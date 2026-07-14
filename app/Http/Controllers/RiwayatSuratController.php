@@ -121,7 +121,7 @@ class RiwayatSuratController extends Controller
 
         $surat = RiwayatSurat::findOrFail($id);
 
-        $filePath = $request->file('file_surat')->store('surat', 'public');
+        $filePath = $request->file('file_surat')->store('surat', 'public_direct');
 
         DetailSurat::updateOrCreate(
             [
@@ -148,8 +148,8 @@ class RiwayatSuratController extends Controller
     {
         $surat = RiwayatSurat::with('detailSurat')->findOrFail($id);
         if ($surat->detailSurat) {
-            if (Storage::disk('public')->exists($surat->detailSurat->file_path)) {
-                Storage::disk('public')->delete($surat->detailSurat->file_path);
+            if (Storage::disk('public_direct')->exists($surat->detailSurat->file_path)) {
+                Storage::disk('public_direct')->delete($surat->detailSurat->file_path);
             }
             $surat->detailSurat()->delete();
         }

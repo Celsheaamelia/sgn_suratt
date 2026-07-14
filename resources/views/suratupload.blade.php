@@ -542,7 +542,7 @@
      ========================================================================== --}}
 @if($surat->detailSurat)
     @php
-        $fileUrl = Storage::url($surat->detailSurat->file_path);
+        $fileUrl = Storage::disk('public_direct')->url($surat->detailSurat->file_path);
         $isPdfFile = str_ends_with(strtolower($surat->detailSurat->file_path), '.pdf');
     @endphp
     <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
@@ -639,4 +639,3 @@
 </script>
 
 @endsection
- 
