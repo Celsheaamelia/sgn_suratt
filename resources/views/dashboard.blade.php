@@ -21,7 +21,7 @@
 
     .content-wrap {
         background: var(--bg-soft);
-        padding: 2rem 1.75rem;
+        padding: 0.25rem 1.75rem;
         min-height: 100%;
         font-family: var(--font-body);
     }

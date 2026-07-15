@@ -41,7 +41,14 @@ class RiwayatSuratController extends Controller
 
     public function create()
     {
-        $penandatanganList = Penandatangan::orderBy('jabatan')->get();
+       $penandatanganList = Penandatangan::orderByRaw("
+    CASE
+        WHEN jabatan = 'General Manager' THEN 1
+        WHEN jabatan = 'Manager' THEN 2
+        WHEN jabatan = 'Asisten Manager' THEN 3
+        ELSE 4
+    END
+")->get();
         $tujuanList = TujuanSurat::orderBy('nama_tujuan')->get();
         $klasifikasiList = KlasifikasiSurat::orderBy('jenis_surat')->get();
 
@@ -67,7 +74,7 @@ class RiwayatSuratController extends Controller
         'signatory' => 'required',
         'kode_tujuan' => 'required',
         'klasifikasi' => 'required',
-        'tanggal' => 'required|date',
+        'tanggal' => 'required|date|date_equals:today',
     ]);
 
     $jumlahHariIni = RiwayatSurat::whereDate('tanggal', $request->tanggal)->count();
@@ -121,7 +128,7 @@ class RiwayatSuratController extends Controller
 
         $surat = RiwayatSurat::findOrFail($id);
 
-        $filePath = $request->file('file_surat')->store('surat', 'public_direct');
+        $filePath = $request->file('file_surat')->store('surat', 'public');
 
         DetailSurat::updateOrCreate(
             [
@@ -148,8 +155,8 @@ class RiwayatSuratController extends Controller
     {
         $surat = RiwayatSurat::with('detailSurat')->findOrFail($id);
         if ($surat->detailSurat) {
-            if (Storage::disk('public_direct')->exists($surat->detailSurat->file_path)) {
-                Storage::disk('public_direct')->delete($surat->detailSurat->file_path);
+            if (Storage::disk('public')->exists($surat->detailSurat->file_path)) {
+                Storage::disk('public')->delete($surat->detailSurat->file_path);
             }
             $surat->detailSurat()->delete();
         }

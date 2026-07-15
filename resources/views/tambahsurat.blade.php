@@ -40,7 +40,7 @@
     }
 
     .ledger-page {
-        background: var(--ledger);
+        background: transparent;
         font-family: var(--font-body);
         color: var(--ink);
         min-height: 100vh;
@@ -449,7 +449,7 @@
 </style>
 
 <div class="ledger-page">
-    <div class="container-fluid py-4 py-md-5">
+    <div class="container-fluid py-1 py-md-2">
 
         {{-- Alert sukses --}}
         @if (session('success'))
@@ -490,7 +490,7 @@
                                     name="perihal"
                                     id="perihal"
                                     required
-                                    placeholder="e.g. Annual Budget Approval Request"
+                                    placeholder="Keterangan surat"
                                     value="{{ old('perihal') }}"
                                     class="form-control">
                             </div>
@@ -516,6 +516,7 @@
                                 </div>
 
                                 {{-- Kode Tujuan (searchable) --}}
+                                {{-- searchable --}}
                                 <div class="col-md-6">
                                     <label for="kode_tujuan" class="form-label">
                                         Kode Tujuan <span class="ledger-required">*</span>
@@ -535,6 +536,7 @@
 
                             <div class="row g-3 mb-3">
                                 {{-- Klasifikasi Surat (searchable) --}}
+                                {{-- searchable --}}
                                 <div class="col-md-6">
                                     <label for="klasifikasi" class="form-label">
                                         Klasifikasi Surat <span class="ledger-required">*</span>
@@ -562,6 +564,8 @@
                                         id="tanggal"
                                         required
                                         value="{{ old('tanggal', date('Y-m-d')) }}"
+                                        min="{{ date('Y-m-d') }}"
+                                        max="{{ date('Y-m-d') }}"
                                         class="form-control">
                                 </div>
                             </div>
