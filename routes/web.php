@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RiwayatSuratController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KeepController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -38,7 +39,7 @@ function simpanSurat(array $data): void
     Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::get('/dashboard/chart-data', [DashboardController::class, 'chartRange'])
     ->name('dashboard.chart-data');
 
@@ -59,6 +60,18 @@ function simpanSurat(array $data): void
 
     Route::post('/riwayat-surat/{riwayatSurat}/upload', [RiwayatSuratController::class,'upload'])
         ->name('surat.upload');
+
+    Route::get('/keep-nomor-surat', [KeepController::class, 'keepNomorSurat'])
+        ->name('keepnomorsurat');
+
+    Route::post('/keep-nomor-surat', [KeepController::class, 'storeKeepNomor'])
+        ->name('keepnomorsurat.store');
+
+    Route::post('/keep-nomor-surat/{id}/gunakan', [KeepController::class, 'gunakanKeepNomor'])
+        ->name('keepnomorsurat.gunakan');
+
+    Route::get('/keep-nomor-surat/cek-nomor', [KeepController::class, 'cekNomorTerpakai'])
+    ->name('keepnomorsurat.cek-nomor');
 
     Route::get('/surat/upload/{surat}', [RiwayatSuratController::class, 'showUpload'])->name('surat.upload.show');
     Route::post('/surat/upload/{surat}', [RiwayatSuratController::class, 'storeUpload'])->name('surat.upload.store');
