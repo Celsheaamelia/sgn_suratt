@@ -362,9 +362,9 @@
                     <h5 class="panel-title">Grafik Penggunaan Nomor Surat</h5>
 
                     <div class="date-range-filter">
-                        <input type="date" id="startDate" value="{{ $defaultStart->toDateString() }}" max="{{ now()->toDateString() }}">
+                        <input type="date" id="startDate" value="{{ $defaultStart->toDateString() }}">
                         <span class="date-sep">s/d</span>
-                        <input type="date" id="endDate" value="{{ $defaultEnd->toDateString() }}" max="{{ now()->toDateString() }}">
+                        <input type="date" id="endDate" value="{{ $defaultEnd->toDateString() }}">
                         <button type="button" class="btn-terapkan" id="applyDateRange">Terapkan</button>
                     </div>
                 </div>

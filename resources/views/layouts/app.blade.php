@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <title>Sistem Manajemen Surat</title>
 
-    {{-- Bootstrap dulu, baru CSS custom kamu di bawahnya --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/assets/style.css') }}">
 
-    {{-- CSS khusus halaman Tambah Surat --}}
     <link rel="stylesheet" href="{{ asset('asset/tambahsurat.css') }}">
 
-    @stack('styles') {{-- <<< BARIS BARU: tempat nampung @push('styles') dari child view --}}
+    @stack('styles')
 
     <style>
         body {
@@ -22,19 +20,15 @@
             font-family: 'Inter', 'Segoe UI', sans-serif;
         }
 
-        /* NOTE: posisi & lebar .sidebar diatur di sidebar.blade.php sendiri
-           (position: fixed, width: 280px) — jangan didefinisikan ulang di sini
-           supaya nggak saling timpa. */
-
         .app-shell {
             min-height: 100vh;
             width: 100%;
         }
 
         .content {
-            margin-left: 280px;              /* selebar sidebar */
+            margin-left: 280px;
             padding: 30px;
-            padding-top: calc(30px + 60px);  /* + tinggi navbar fixed */
+            padding-top: calc(30px + 60px);
             overflow-x: hidden;
         }
 
@@ -45,7 +39,6 @@
             }
         }
 
-        /* ===== Navbar ===== */
         .navbar-custom {
             height: 60px;
             width: 100%;
@@ -101,7 +94,7 @@
         }
 
         .logo img {
-            height: 50px;      /* dikecilin biar muat di navbar 80px */
+            height: 65px;
             width: auto;
             object-fit: contain;
         }

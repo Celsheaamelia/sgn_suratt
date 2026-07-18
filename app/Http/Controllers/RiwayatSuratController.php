@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 
 class RiwayatSuratController extends Controller
 {
+
+    use NomorUrut;
+
     public function index()
     {
         $suratList = RiwayatSurat::with([
@@ -41,20 +44,20 @@ class RiwayatSuratController extends Controller
 
     public function create()
     {
-       $penandatanganList = Penandatangan::orderByRaw("
-    CASE
-        WHEN jabatan = 'General Manager' THEN 1
-        WHEN jabatan = 'Manager' THEN 2
-        WHEN jabatan = 'Asisten Manager' THEN 3
-        ELSE 4
-    END
-")->get();
+        $penandatanganList = Penandatangan::orderByRaw("
+        CASE
+            WHEN jabatan = 'General Manager' THEN 1
+            WHEN jabatan = 'Manager' THEN 2
+            WHEN jabatan = 'Asisten Manager' THEN 3
+            ELSE 4
+        END
+    ")->get();
         $tujuanList = TujuanSurat::orderBy('nama_tujuan')->get();
         $klasifikasiList = KlasifikasiSurat::orderBy('jenis_surat')->get();
 
         // $today = now()->toDateString();
         $tanggal = now()->toDateString();
-        $nextSequence = RiwayatSurat::whereDate('tanggal', $tanggal)->count() + 1;
+        $nextSequence = $this->nextAvailableSequence($tanggal);
 
         $suratList = RiwayatSurat::latest()->get();
 
@@ -77,8 +80,7 @@ class RiwayatSuratController extends Controller
         'tanggal' => 'required|date|date_equals:today',
     ]);
 
-    $jumlahHariIni = RiwayatSurat::whereDate('tanggal', $request->tanggal)->count();
-    $urut = str_pad($jumlahHariIni + 1, 3, '0', STR_PAD_LEFT);
+    $urut = str_pad($this->nextAvailableSequence($request->tanggal), 3, '0', STR_PAD_LEFT);
 
     // Ambil data berdasarkan ID yang dipilih di form
     $penandatangan = Penandatangan::find($request->signatory);
@@ -170,12 +172,8 @@ class RiwayatSuratController extends Controller
 
     public function getNextSequence(Request $request)
     {
-        $tanggal = $request->tanggal;
-
-        $jumlah = RiwayatSurat::whereDate('tanggal', $tanggal)->count();
-
         return response()->json([
-            'sequence' => str_pad($jumlah + 1, 3, '0', STR_PAD_LEFT)
+            'sequence' => str_pad($this->nextAvailableSequence($request->tanggal), 3, '0', STR_PAD_LEFT)
         ]);
     }
 }

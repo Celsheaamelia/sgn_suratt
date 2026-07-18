@@ -2,11 +2,6 @@
 
 @section('content')
 
-{{--
-    Choices.js — bikin <select> jadi searchable, dipakai buat Klasifikasi & Kode Tujuan.
-    Di-push ke stack di layout (bukan ditaruh langsung di tengah body) supaya
-    tidak merusak posisi sidebar/navbar.
---}}
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 @endpush
@@ -163,8 +158,6 @@
         letter-spacing: 0.08em;
     }
 
-    /* Input readonly (mis. Nomor Urut) — keliatan abu-abu kayak disabled,
-       biar jelas nggak bisa diklik/diedit, dan nggak nyala emas pas fokus */
     .ledger-form .form-control[readonly] {
         background-color: var(--ledger);
         color: var(--ink-soft);
@@ -501,8 +494,6 @@
                                     <label for="signatory" class="form-label">
                                         Penandatangan <span class="ledger-required">*</span>
                                     </label>
-                                    {{-- NOTE: value pakai id (bukan kode) — pastikan controller
-                                         surat.store juga baca 'signatory' sebagai id, bukan kode. --}}
                                     <select name="signatory" id="signatory" required class="form-select">
                                         <option value="">Pilih Penandatangan</option>
                                         @foreach ($penandatanganList as $penandatangan)
@@ -516,7 +507,6 @@
                                 </div>
 
                                 {{-- Kode Tujuan (searchable) --}}
-                                {{-- searchable --}}
                                 <div class="col-md-6">
                                     <label for="kode_tujuan" class="form-label">
                                         Kode Tujuan <span class="ledger-required">*</span>
@@ -536,7 +526,6 @@
 
                             <div class="row g-3 mb-3">
                                 {{-- Klasifikasi Surat (searchable) --}}
-                                {{-- searchable --}}
                                 <div class="col-md-6">
                                     <label for="klasifikasi" class="form-label">
                                         Klasifikasi Surat <span class="ledger-required">*</span>
@@ -564,8 +553,6 @@
                                         id="tanggal"
                                         required
                                         value="{{ old('tanggal', date('Y-m-d')) }}"
-                                        min="{{ date('Y-m-d') }}"
-                                        max="{{ date('Y-m-d') }}"
                                         class="form-control">
                                 </div>
                             </div>
@@ -613,8 +600,6 @@
                             <p class="mb-0" id="previewNumber">
                                 ---/---/---/--------.{{ str_pad($nextSequence, 3, '0', STR_PAD_LEFT) }}
                             </p>
-                            {{-- placeholder di atas otomatis ke-replace JS jadi format:
-                                 SIGN-TUJUAN-KLASIFIKASI/YYYYMMDD.SEQ (mis. SG26-BD05-SKP/20260710.004) --}}
                         </div>
 
                         <div class="d-flex justify-content-between mb-2">
@@ -687,9 +672,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ===========================
-    // Choices Search Dropdown
-    // ===========================
     new Choices('#kode_tujuan', {
         searchEnabled: true,
         itemSelectText: '',
@@ -702,9 +684,6 @@ document.addEventListener("DOMContentLoaded", function () {
         shouldSort: false,
     });
 
-    // ===========================
-    // Element
-    // ===========================
     const signEl = document.getElementById('signatory');
     const tujuanEl = document.getElementById('kode_tujuan');
     const klasifikasiEl = document.getElementById('klasifikasi');
@@ -715,9 +694,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let seqText = "{{ str_pad($nextSequence,3,'0',STR_PAD_LEFT) }}";
 
-    // ===========================
-    // Helper
-    // ===========================
 
     function selectedKode(select){
         if(select.selectedIndex==-1) return "-";
@@ -731,10 +707,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return tanggal.replaceAll("-","");
     }
-
-    // ===========================
-    // Preview
-    // ===========================
 
     function updatePreview(){
 
@@ -750,10 +722,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("previewKlasifikasi").innerHTML = klasifikasi;
         document.getElementById("previewTanggal").innerHTML = tanggalEl.value;
     }
-
-    // ===========================
-    // Ambil nomor urut terbaru
-    // ===========================
 
     async function loadSequence(){
 
@@ -786,10 +754,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    // ===========================
-    // Event
-    // ===========================
-
     signEl.addEventListener("change",updatePreview);
     tujuanEl.addEventListener("change",updatePreview);
     klasifikasiEl.addEventListener("change",updatePreview);
@@ -800,15 +764,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 @endpush
-{{-- ==========================================================================
-     Modal sukses — muncul setelah surat berhasil disimpan,
-     tanpa pindah ke halaman Riwayat Surat
-     ========================================================================== --}}
+
 @if (session('success'))
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border: 1px solid var(--line); border-radius: 0.9rem;">
-                <div class="modal-body text-center p-4">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pt-0 pb-4 px-4">
                     <div class="mb-3">
                         <i class="fa-solid fa-circle-check" style="font-size: 2.5rem; color: var(--success);"></i>
                     </div>
@@ -821,10 +785,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     @endif
                 </div>
                 <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
-                    <button type="button" class="btn ledger-btn-brass" data-bs-dismiss="modal">
-                        Buat Surat Lagi
-                    </button>
-                    <a href="{{ route('riwayatsurat') }}" class="btn ledger-btn-ghost">
+                    <a href="{{ route('riwayatsurat') }}" class="btn ledger-btn-brass">
                         Lihat Riwayat Surat
                     </a>
                 </div>
@@ -839,7 +800,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 const successModal = new bootstrap.Modal(successModalEl);
                 successModal.show();
 
-                // Reset form setelah modal ditutup, biar siap buat surat berikutnya
                 successModalEl.addEventListener('hidden.bs.modal', function () {
                     const form = document.getElementById('suratForm');
                     if (form) form.reset();

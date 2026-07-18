@@ -3,18 +3,11 @@
 @section('content')
 
 <style>
-    /* ==========================================================================
-       Riwayat Surat — Registry Ledger Theme (matches Tambah Surat)
-       Same token set / typography / card language as tambahsurat.blade.php.
-       ========================================================================== */
-
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
     :root {
-        /* Color tokens — identical to Tambah Surat */
         --ink:        #1c2b23;
         --ink-soft:   #3d4f45;
-        --ledger:     #eef3ea;
         --ledger-line:#cdd9c8;
         --paper:      #fbfcf9;
         --brass:      #a9812f;
@@ -31,18 +24,13 @@
         --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
     }
 
-    /* ==========================================================================
-       Page base — same ledger paper canvas as Tambah Surat
-       ========================================================================== */
-
-    .ledger-page {
-        background: transparent;
+    /* .ledger-page {
+        background: var(--ledger);
         font-family: var(--font-body);
         color: var(--ink);
         min-height: 100vh;
-    }
+    } */
 
-    /* Breadcrumb */
     .ledger-breadcrumb {
         background: transparent;
         padding: 0;
@@ -61,7 +49,6 @@
         font-weight: 600;
     }
 
-    /* Alert */
     .ledger-alert-success {
         background: var(--success-bg);
         border: 1px solid #cfe2d4;
@@ -69,24 +56,38 @@
         border-radius: 0.75rem;
         font-size: 0.9rem;
     }
+    .ledger-alert-danger {
+        background: var(--danger-bg);
+        border: 1px solid #f2d3cc;
+        color: var(--danger);
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+    }
 
-    /* ==========================================================================
-       Cards — same surface, radius, shadow as Tambah Surat
-       ========================================================================== */
+    .ledger-card,
+    .ledger-stamp {
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        box-shadow: 0 1px 2px rgba(28,43,35,0.05), 0 1px 10px rgba(28,43,35,0.04);
+    }
 
     .ledger-card {
         background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 0.9rem;
-        box-shadow: 0 1px 2px rgba(28,43,35,0.05), 0 1px 10px rgba(28,43,35,0.04);
+    }
+
+    .ledger-card-header {
+        background: transparent;
+        border-bottom: 1px solid var(--line);
+        padding: 1.5rem 1.75rem 1.1rem;
     }
 
     .ledger-title {
         font-family: var(--font-display);
         font-weight: 600;
-        font-size: 1.55rem;
+        font-size: 1.4rem;
         color: var(--ink);
         letter-spacing: -0.01em;
+        margin-bottom: 0.25rem;
     }
 
     .ledger-subtitle {
@@ -94,243 +95,255 @@
         font-size: 0.85rem;
     }
 
-    /* Counter badge — brass stamp pill, echoes the registrar's stamp on Tambah Surat */
-    .ledger-badge {
-        background: var(--brass-tint);
-        color: var(--brass-dark);
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-        padding: 0.4rem 0.85rem;
-        border-radius: 999px;
-        white-space: nowrap;
-        display: inline-block;
-        border: 1px solid rgba(169,129,47,0.25);
+    .ledger-card .card-body {
+        padding: 1.75rem;
     }
 
-    /* ==========================================================================
-       Toolbar — same input styling language as Tambah Surat's form fields
-       ========================================================================== */
-
-    #searchInput,
-    #filterKlasifikasi,
-    #sortOrder {
-        font-family: var(--font-body);
+    .ledger-btn-ghost {
+        background: transparent;
+        color: var(--ink-soft);
+        font-weight: 500;
+        border: none;
+        padding: 0.6rem 1rem;
+        transition: color 0.15s ease;
+        text-decoration: none;
+    }
+    .ledger-btn-ghost:hover {
         color: var(--ink);
-        background-color: var(--paper);
-        border: 1px solid var(--line);
+    }
+
+    .ledger-btn-brass {
+        background: linear-gradient(180deg, #b8903f, var(--brass-dark));
+        box-shadow: 0 4px 14px rgba(138,106,36,0.35);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        padding: 0.65rem 1.4rem;
         border-radius: 0.55rem;
-        padding: 0.65rem 0.95rem;
-        font-size: 0.92rem;
+    }
+    .ledger-btn-brass:hover {
+        background: linear-gradient(180deg, #c39a4c, #7a5c1f);
+        box-shadow: 0 6px 18px rgba(138,106,36,0.42);
+        color: #fff;
+    }
+    .ledger-btn-brass:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
     }
 
-    .ledger-input-icon {
-        background-color: var(--ledger);
-        border: 1px solid var(--line);
-        border-right: none;
-        color: var(--ink-soft);
-        border-radius: 0.55rem 0 0 0.55rem;
-    }
-
-    .input-group #searchInput {
-        border-radius: 0 0.55rem 0.55rem 0;
-    }
-
-    #searchInput:focus,
-    #filterKlasifikasi:focus,
-    #sortOrder:focus {
-        outline: none;
-        border-color: var(--brass);
-        box-shadow: 0 0 0 3px rgba(169,129,47,0.16);
-    }
-
-    #searchInput:focus-visible,
-    #filterKlasifikasi:focus-visible,
-    #sortOrder:focus-visible {
-        outline: 2px solid var(--brass-dark);
-        outline-offset: 2px;
-    }
-
-    #filterKlasifikasi,
-    #sortOrder {
-        cursor: pointer;
-    }
-
-    /* ==========================================================================
-       Archive table — same ledger surface/ink language, now as a real <table>
-       ========================================================================== */
-
-    #archiveCard {
+    .ledger-stamp {
+        background: linear-gradient(160deg, #24382e 0%, var(--ink) 70%);
+        border: 1px solid rgba(255,255,255,0.06);
+        position: relative;
         overflow: hidden;
+        color: var(--brass-tint);
     }
-
-    .ledger-table {
-        width: 100%;
-        margin-bottom: 0;
-        border-collapse: collapse;
-    }
-
-    .ledger-table thead th {
-        background: var(--ledger);
-        color: var(--ink-soft);
+    .ledger-stamp::before {
+        content: "TERDAFTAR";
+        position: absolute;
+        top: 14px;
+        right: -34px;
         font-family: var(--font-mono);
-        font-size: 0.7rem;
-        letter-spacing: 0.1em;
+        font-size: 0.62rem;
+        letter-spacing: 0.28em;
+        color: rgba(244,236,216,0.14);
+        transform: rotate(8deg);
+        pointer-events: none;
+    }
+    .ledger-stamp-title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: var(--brass-tint);
+    }
+    .ledger-stamp-box {
+        background: rgba(169,129,47,0.08);
+        border: 1.5px dashed rgba(244,236,216,0.35);
+        border-radius: 0.85rem;
+        position: relative;
+        padding: 1.1rem 1rem;
+    }
+    .ledger-stamp-label {
+        color: rgba(244,236,216,0.65);
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.22em;
         text-transform: uppercase;
-        font-weight: 600;
-        border-bottom: none;
-        padding: 0.9rem 1.5rem;
-        white-space: nowrap;
     }
-
-    .ledger-table tbody tr {
-        border-top: 1px solid var(--ledger-line);
-        transition: background 0.15s ease;
-    }
-
-    .ledger-table tbody tr:hover {
-        background: var(--brass-tint);
-    }
-
-    .ledger-table tbody td {
-        padding: 1rem 1.5rem;
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
-
-    .ledger-table .ledger-nomor {
-        color: var(--brass-dark);
+    .ledger-stamp-number {
+        display: inline-block;
+        color: var(--brass-tint);
         font-family: var(--font-mono);
         font-weight: 600;
-        font-size: 0.84rem;
-        letter-spacing: 0.02em;
+        font-size: 1.05rem;
+        letter-spacing: 0.04em;
         word-break: break-all;
     }
-
-    .ledger-table .ledger-perihal {
-        color: var(--ink);
+    .ledger-stamp-key {
+        color: rgba(244,236,216,0.55);
+        font-size: 0.83rem;
     }
-
-    .ledger-table .ledger-tujuan,
-    .ledger-table .ledger-signatory {
-        color: var(--ink-soft);
-    }
-
-    .ledger-table .ledger-tanggal {
-        color: var(--ink-soft);
+    .ledger-stamp-value {
+        color: var(--brass-tint);
         font-family: var(--font-mono);
-        font-size: 0.82rem;
-        white-space: nowrap;
+        font-weight: 600;
+        font-size: 0.86rem;
+        letter-spacing: 0.02em;
+        text-align: right;
     }
 
-    /* Status pill */
+    /* Status badge di header card info */
     .ledger-status-pill {
         font-family: var(--font-mono);
         font-size: 0.68rem;
         font-weight: 600;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        padding: 0.32rem 0.7rem;
+        padding: 0.35rem 0.8rem;
         border-radius: 999px;
         white-space: nowrap;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
     }
-
     .ledger-status-pill.is-uploaded {
         background: var(--success-bg);
         color: var(--success);
         border: 1px solid #cfe2d4;
     }
-
     .ledger-status-pill.is-pending {
-        background: var(--brass-tint);
-        color: var(--brass-dark);
-        border: 1px solid rgba(169,129,47,0.25);
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid #f2d3cc;
     }
 
-    .ledger-btn-detail {
-        background: transparent;
-        border: 1px solid var(--ink);
-        color: var(--ink-soft);
-        font-family: var(--font-body);
-        font-weight: 600;
-        font-size: 0.8rem;
-        padding: 0.4rem 0.9rem;
-        border-radius: 0.5rem;
-        white-space: nowrap;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        transition: background 0.15s ease, color 0.15s ease;
-    }
-
-    .ledger-btn-detail:hover {
-        background: var(--ink);
-        color: #fff;
-    }
-
-    /* ==========================================================================
-       Empty states — same brass/dashed accent as Tambah Surat's stamp box
-       ========================================================================== */
-
-    .ledger-empty {
+    /* Dropzone */
+    .ledger-dropzone {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: 3.5rem 2rem;
-        color: var(--ink-soft);
+        border: 1.5px dashed var(--line);
+        border-radius: 0.85rem;
+        padding: 2.5rem 1.5rem;
+        cursor: pointer;
+        background: var(--ledger);
+        transition: border-color .15s ease, background .15s ease;
     }
-
-    .ledger-empty i {
-        font-size: 2rem;
-        color: var(--ledger-line);
-        margin-bottom: 1rem;
+    .ledger-dropzone:hover,
+    .ledger-dropzone.is-dragover {
+        border-color: var(--brass);
+        background: rgba(169,129,47,0.06);
     }
-
-    .ledger-empty p {
-        margin: 0 0 1rem 0;
+    .ledger-dropzone-icon {
+        font-size: 1.8rem;
+        color: var(--brass);
+        margin-bottom: 0.75rem;
+    }
+    .ledger-dropzone-text {
+        color: var(--ink);
         font-size: 0.92rem;
     }
+    .ledger-dropzone-hint {
+        color: var(--ink-soft);
+        font-size: 0.78rem;
+    }
 
-    .ledger-cta {
-        font-family: var(--font-mono);
-        font-size: 0.82rem;
-        font-weight: 600;
+    /* Baris file (sudah ada / baru dipilih) */
+    .file-row {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 0.7rem;
+        background: var(--paper);
+    }
+    .file-row-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.6rem;
+        background: var(--brass-tint);
         color: var(--brass-dark);
-        text-decoration: none;
-        border-bottom: 1px dashed var(--brass-dark);
-        padding-bottom: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.05rem;
+    }
+    .file-row-name {
+        font-weight: 600;
+        color: var(--ink);
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+    .file-row-meta {
+        color: var(--ink-soft);
+        font-size: 0.78rem;
+        font-family: var(--font-mono);
+    }
+    .file-row-clear {
+        border: none;
+        background: transparent;
+        color: var(--ink-soft);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .file-row-clear:hover {
+        color: var(--danger);
     }
 
-    .ledger-cta:hover {
-        color: var(--brass);
-        border-color: var(--brass);
+    /* Modal preview file — tetap dalam tema ledger */
+    #filePreviewModal .modal-content {
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        overflow: hidden;
     }
-
-    /* ==========================================================================
-       Responsive — let the table scroll horizontally on small screens
-       instead of squeezing/breaking columns
-       ========================================================================== */
-
-    .ledger-table-scroll {
-        overflow-x: auto;
+    #filePreviewModal .modal-header {
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+        padding: 1.1rem 1.5rem;
+    }
+    #filePreviewModal .modal-title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: var(--ink);
+    }
+    #filePreviewModal .modal-body {
+        background: #f0f0f0;
+    }
+    #filePreviewModal .modal-footer {
+        background: var(--paper);
+        border-top: 1px solid var(--line);
+        padding: 0.9rem 1.5rem;
     }
 
     @media (prefers-reduced-motion: reduce) {
-        * {
-            transition: none !important;
-        }
+        * { transition: none !important; }
     }
 </style>
 
-<div class="ledger-page" id="riwayatPage">
+<div class="ledger-page">
     <div class="container-fluid py-1 py-md-2">
 
-        {{-- Alert sukses (jika ada aksi hapus dll) --}}
+        @if($surat->detailSurat)
+        <div class="alert alert-success">
+            <h5>File sudah diupload</h5>
+            <p>
+                <strong>Nama File:</strong>
+                {{ $surat->detailSurat->file_name }}
+            </p>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#filePreviewModal">
+                Lihat File
+            </button>
+        </div>
+        @endif
+
+        {{-- Alert --}}
         @if (session('success'))
             <div class="alert ledger-alert-success d-flex align-items-center gap-2" role="alert">
                 <i class="fa-solid fa-circle-check"></i>
@@ -338,179 +351,288 @@
             </div>
         @endif
 
-        {{-- Header + Toolbar --}}
-        <div class="card ledger-card mb-4">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
-                    <div>
-                        <h2 class="ledger-title mb-1">Riwayat Surat</h2>
-                    </div>
-                    <div id="totalCounter">
-                        <span class="ledger-badge">
-                            <span id="totalCount">{{ count($suratList ?? []) }}</span> surat tercatat
+        @if ($errors->any())
+            <div class="alert ledger-alert-danger" role="alert">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        @php
+            $isUploaded = ($surat->status ?? 'Belum Terupload') === 'Terupload';
+        @endphp
+
+        <div class="row g-4">
+
+            {{-- KIRI: Info surat + Upload --}}
+            <div class="col-lg-8">
+
+                {{-- Info surat --}}
+                <div class="card ledger-card mb-4">
+                    <div class="card-header ledger-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h2 class="ledger-title mb-1">Detail Surat</h2>
+                            <p class="ledger-subtitle mb-0">{{ $surat->nomor_surat }}</p>
+                        </div>
+                        <span class="ledger-status-pill {{ $isUploaded ? 'is-uploaded' : 'is-pending' }}">
+                            <i class="fa-solid {{ $isUploaded ? 'fa-circle-check' : 'fa-circle-exclamation' }}"></i>
+                            {{ $surat->status ?? 'Belum Terupload' }}
                         </span>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="ledger-subtitle mb-1">Perihal</div>
+                                <div>{{ $surat->perihal }}</div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="ledger-subtitle mb-1">Klasifikasi</div>
+                                <div>{{ $surat->klasifikasiSurat->kode ?? '-' }}</div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="ledger-subtitle mb-1">Penandatangan</div>
+                                <div>{{ $surat->penandatangan->jabatan ?? '-' }}</div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="ledger-subtitle mb-1">Tujuan</div>
+                                <div>{{ $surat->tujuanSurat->nama_tujuan ?? '-' }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Toolbar: search + filter klasifikasi (sesuai tabel klasifikasi_surat) + sort --}}
-                <div class="row g-3 mt-3">
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text ledger-input-icon">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                            </span>
-                            <input
-                                type="text"
-                                id="searchInput"
-                                placeholder="Cari nomor surat atau perihal..."
-                                class="form-control">
+                {{-- Upload surat --}}
+                <div class="card ledger-card">
+                    <div class="card-header ledger-card-header">
+                        <h2 class="ledger-title h6 mb-1">Upload Surat Hasil Scan</h2>
+                        <p class="ledger-subtitle mb-0">Format PDF atau gambar (JPG/PNG), maksimal 10 MB.</p>
+                    </div>
+
+                    <div class="card-body">
+
+                        {{-- File yang sudah pernah diupload --}}
+                        @if($surat->detailSurat)
+                            <div class="file-row mb-4">
+
+                                <div class="file-row-icon">
+                                    <i class="fa-solid fa-file"></i>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="file-row-name">
+                                        {{ $surat->detailSurat->file_name }}
+                                    </div>
+
+                                    <div class="file-row-meta">
+                                        Diupload
+                                        {{ $surat->detailSurat->uploaded_at->format('d M Y H:i') }}
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#filePreviewModal">
+                                        <i class="fa-solid fa-eye"></i>
+                                        Lihat
+                                    </button>
+
+                                    <form action="{{ route('surat.upload.delete', $surat->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Hapus file surat ini?')">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button class="btn btn-outline-danger btn-sm">
+                                            <i class="fa-solid fa-trash"></i>
+                                            Hapus
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+                            @endif
+
+                        <form method="POST"
+                              action="{{ route('surat.upload.store', $surat->id) }}"
+                              enctype="multipart/form-data"
+                              id="uploadForm">
+                            @csrf
+
+                            <label for="fileInput" class="ledger-dropzone" id="dropzone">
+                                <i class="fa-solid fa-cloud-arrow-up ledger-dropzone-icon"></i>
+                                <p class="ledger-dropzone-text mb-1">
+                                    <span class="fw-semibold">Klik untuk pilih file</span> atau tarik & lepas di sini
+                                </p>
+                                <p class="ledger-dropzone-hint mb-0">PDF, JPG, PNG — maks. 10 MB</p>
+                                <input type="file" name="file_surat" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" hidden>
+                            </label>
+
+                            <div id="fileSelectedRow" class="file-row mt-3 d-none">
+                                <div class="file-row-icon">
+                                    <i class="fa-solid fa-file" id="fileSelectedIcon"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="file-row-name" id="fileSelectedName">-</div>
+                                    <div class="file-row-meta" id="fileSelectedSize">-</div>
+                                </div>
+                                <button type="button" class="file-row-clear" id="clearFileBtn" aria-label="Hapus file">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3 mt-4">
+                                <a href="{{ route('riwayatsurat') }}" class="btn ledger-btn-ghost">
+                                    Kembali
+                                </a>
+                                <button type="submit" class="btn ledger-btn-brass" id="uploadSubmitBtn" disabled>
+                                    <i class="fa-solid fa-upload me-1"></i>
+                                    Upload Surat
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- KANAN: Stempel nomor surat --}}
+            <div class="col-lg-4">
+                <div class="card ledger-stamp">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <i class="fa-solid fa-stamp"></i>
+                            <h3 class="ledger-stamp-title mb-0">Nomor Terdaftar</h3>
                         </div>
-                    </div>
 
-                    <div class="col-md-3">
-                        <select id="filterKlasifikasi" class="form-select">
-                            <option value="">Semua Klasifikasi</option>
-                            @foreach ($klasifikasiList ?? [] as $klasifikasi)
-                                <option value="{{ $klasifikasi->kode }}">{{ $klasifikasi->kode }} — {{ $klasifikasi->jenis_surat }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="ledger-stamp-box mb-4">
+                            <p class="ledger-stamp-label mb-1">Nomor Surat</p>
+                            <p class="mb-0 ledger-stamp-number">{{ $surat->nomor_surat }}</p>
+                        </div>
 
-                    <div class="col-md-3">
-                        <select id="sortOrder" class="form-select">
-                            <option value="desc">Terbaru dulu</option>
-                            <option value="asc">Terlama dulu</option>
-                        </select>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="ledger-stamp-key">Klasifikasi</span>
+                            <span class="ledger-stamp-value">{{ $surat->klasifikasiSurat->kode ?? '-' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="ledger-stamp-key">Penandatangan</span>
+                            <span class="ledger-stamp-value">{{ $surat->penandatangan->kode ?? '-' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="ledger-stamp-key">Tujuan</span>
+                            <span class="ledger-stamp-value">{{ $surat->tujuanSurat->kode ?? '-' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="ledger-stamp-key">Tanggal</span>
+                            <span class="ledger-stamp-value">{{ $surat->tanggal }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Archive table --}}
-        <div class="card ledger-card" id="archiveCard">
-            @if (count($suratList ?? []) > 0)
-                <div class="ledger-table-scroll">
-                    <table class="ledger-table">
-                        <thead>
-                            <tr>
-                                <th>Nomor Surat</th>
-                                <th>Perihal</th>
-                                <th>Tujuan</th>
-                                <th>Penandatangan</th>
-                                <th>Tanggal Dibuat</th>
-                                <th>Status</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="archiveList">
-                            @foreach ($suratList as $surat)
-                                @php
-                                    $isUploaded = ($surat->status ?? 'Belum Terupload') === 'Terupload';
-                                @endphp
-                                <tr
-                                    data-perihal="{{ strtolower($surat->perihal) }}"
-                                    data-nomor="{{ strtolower($surat->nomor_surat) }}"
-                                    data-klasifikasi="{{ $surat->klasifikasiSurat->kode ?? '' }}"
-                                    data-tanggal="{{ $surat->tanggal }}">
-                                    <td class="ledger-nomor">{{ $surat->nomor_surat }}</td>
-                                    <td class="ledger-perihal">{{ $surat->perihal }}</td>
-                                    <td class="ledger-tujuan">{{ $surat->tujuanSurat->nama_tujuan ?? '-' }}</td>
-                                    <td class="ledger-signatory">{{ $surat->penandatangan->jabatan ?? '-' }}</td>
-                                    <td class="ledger-tanggal">{{ $surat->tanggal }}</td>
-                                    <td>
-                                        <span class="ledger-status-pill {{ $isUploaded ? 'is-uploaded' : 'is-pending' }}">
-                                            {{ $surat->status ?? 'Belum Terupload' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('surat.upload.show', $surat->id) }}" class="ledger-btn-detail">
-                                            <i class="fa-regular fa-eye"></i>
-                                            Detail
-                                        </a>
-
-                                    </td>
-
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="emptySearchState" class="d-none">
-                    <div class="ledger-empty">
-                        <i class="fa-solid fa-folder-open"></i>
-                        <p>Tidak ada surat yang cocok dengan pencarian.</p>
-                    </div>
-                </div>
-            @else
-                <div class="ledger-empty">
-                    <i class="fa-solid fa-box-archive"></i>
-                    <p>Belum ada surat yang tercatat.</p>
-                    <a href="{{ route('tambahsurat') }}" class="ledger-cta">Buat surat pertama</a>
-                </div>
-            @endif
         </div>
     </div>
 </div>
 
+@if($surat->detailSurat)
+    @php
+        $fileUrl = Storage::url($surat->detailSurat->file_path);
+        $isPdfFile = str_ends_with(strtolower($surat->detailSurat->file_path), '.pdf');
+    @endphp
+    <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filePreviewModalLabel">
+                        {{ $surat->detailSurat->file_name }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 75vh;">
+                    @if($isPdfFile)
+                        <iframe src="{{ $fileUrl }}" style="width:100%; height:100%; border:0;"></iframe>
+                    @else
+                        <div class="d-flex align-items-center justify-content-center h-100 p-3">
+                            <img src="{{ $fileUrl }}" alt="{{ $surat->detailSurat->file_name }}" style="max-width:100%; max-height:100%; object-fit:contain;">
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ $fileUrl }}" target="_blank" class="ledger-cta">
+                        Buka di tab baru
+                    </a>
+                    <button type="button" class="btn ledger-btn-ghost" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 <script>
-    const searchInput = document.getElementById('searchInput');
-    const filterKlasifikasi = document.getElementById('filterKlasifikasi');
-    const sortOrder = document.getElementById('sortOrder');
-    const archiveList = document.getElementById('archiveList');
-    const emptySearchState = document.getElementById('emptySearchState');
-    const totalCount = document.getElementById('totalCount');
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileSelectedRow = document.getElementById('fileSelectedRow');
+    const fileSelectedName = document.getElementById('fileSelectedName');
+    const fileSelectedSize = document.getElementById('fileSelectedSize');
+    const fileSelectedIcon = document.getElementById('fileSelectedIcon');
+    const clearFileBtn = document.getElementById('clearFileBtn');
+    const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
 
-    function applyFilters() {
-        if (!archiveList) return;
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
 
-        const query = searchInput.value.trim().toLowerCase();
-        const klasifikasi = filterKlasifikasi.value;
-        const rows = Array.from(archiveList.querySelectorAll('tr'));
+    function showSelectedFile(file) {
+        if (!file) return;
 
-        let visibleCount = 0;
+        fileSelectedName.textContent = file.name;
+        fileSelectedSize.textContent = formatBytes(file.size);
 
-        rows.forEach(row => {
-            const matchQuery = !query ||
-                row.dataset.nomor.includes(query) ||
-                row.dataset.perihal.includes(query);
-            const matchKlasifikasi = !klasifikasi || row.dataset.klasifikasi === klasifikasi;
-            const visible = matchQuery && matchKlasifikasi;
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        fileSelectedIcon.className = isPdf ? 'fa-solid fa-file-pdf' : 'fa-solid fa-file-image';
 
-            row.classList.toggle('d-none', !visible);
-            if (visible) visibleCount++;
-        });
+        fileSelectedRow.classList.remove('d-none');
+        uploadSubmitBtn.disabled = false;
+    }
 
-        totalCount.textContent = visibleCount;
-
-        if (emptySearchState) {
-            emptySearchState.classList.toggle('d-none', visibleCount !== 0);
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            showSelectedFile(fileInput.files[0]);
         }
-    }
+    });
 
-    function applySort() {
-        if (!archiveList) return;
-
-        const rows = Array.from(archiveList.querySelectorAll('tr'));
-        const direction = sortOrder.value;
-
-        rows.sort((a, b) => {
-            const dateA = new Date(a.dataset.tanggal);
-            const dateB = new Date(b.dataset.tanggal);
-            return direction === 'asc' ? dateA - dateB : dateB - dateA;
+    ['dragover', 'dragenter'].forEach(evt => {
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.add('is-dragover');
         });
+    });
 
-        rows.forEach(row => archiveList.appendChild(row));
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', applyFilters);
-        filterKlasifikasi.addEventListener('change', applyFilters);
-        sortOrder.addEventListener('change', () => {
-            applySort();
-            applyFilters();
+    ['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('is-dragover');
         });
-    }
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            fileInput.files = files;
+            showSelectedFile(files[0]);
+        }
+    });
+
+    clearFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileSelectedRow.classList.add('d-none');
+        uploadSubmitBtn.disabled = true;
+    });
 </script>
 
 @endsection

@@ -18,37 +18,70 @@
                 </a>
             </li>
 
-            <li>
-                <a href="{{ route('tambahsurat') }}" class="nav-link {{ request()->routeIs('tambahsurat') ? 'active' : '' }}">
+            @php
+                $manajemenSuratActive = request()->routeIs('tambahsurat') || request()->routeIs('keepnomorsurat');
+            @endphp
+            <li class="nav-group">
+                <a href="#manajemenSuratMenu"
+                   class="nav-link nav-link-parent {{ $manajemenSuratActive ? 'active' : '' }}"
+                   data-bs-toggle="collapse"
+                   role="button"
+                   aria-expanded="{{ $manajemenSuratActive ? 'true' : 'false' }}"
+                   aria-controls="manajemenSuratMenu">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Manajemen Surat</span>
+                    <i class="bi bi-chevron-down nav-caret"></i>
                 </a>
+
+                <div class="collapse {{ $manajemenSuratActive ? 'show' : '' }}" id="manajemenSuratMenu">
+                    <ul class="nav-submenu">
+                        <li>
+                            <a href="{{ route('tambahsurat') }}"
+                               class="nav-sublink {{ request()->routeIs('tambahsurat') ? 'active' : '' }}">
+                                <i class="bi bi-dot"></i>
+                                <span>Buat Nomor Surat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('keepnomorsurat') }}"
+                               class="nav-sublink {{ request()->routeIs('keepnomorsurat') ? 'active' : '' }}">
+                                <i class="bi bi-dot"></i>
+                                <span>Keep Nomor Surat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('riwayatsurat') }}"
+                                class="nav-sublink {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
+                                <i class="bi bi-dot"></i>
+                                <span>Riwayat Surat</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
-            <li>
+            {{-- <li>
                 <a href="{{ route('riwayatsurat') }}" class="nav-link {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
                     <i class="bi bi-folder2-open"></i>
                     <span>Riwayat Surat</span>
                 </a>
-            </li>
+            </li> --}}
 
         </ul>
     </div>
 
-    <div class="user-profile">
+    {{-- <div class="user-profile">
         <div class="avatar">A</div>
         <div class="user-meta">
             <strong>Administrator</strong>
             <small>Online</small>
         </div>
-    </div>
+    </div> --}}
 </aside>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
-    /* Sidebar diam di tempat, nggak ikut scroll halaman.
-       top disamakan dengan tinggi navbar (lihat .navbar-custom di layout). */
     .sidebar {
         position: fixed;
         top: 60px;
@@ -146,6 +179,66 @@
         font-size: 1rem;
         width: 18px;
         text-align: center;
+    }
+
+    .nav-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nav-link-parent {
+        cursor: pointer;
+        position: relative;
+    }
+
+    .nav-caret {
+        margin-left: auto;
+        font-size: 0.75rem !important;
+        width: auto !important;
+        transition: transform 0.2s ease;
+    }
+
+    .nav-link-parent[aria-expanded="true"] .nav-caret {
+        transform: rotate(180deg);
+    }
+
+    .nav-submenu {
+        list-style: none;
+        margin: 0.3rem 0 0.15rem 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .nav-sublink {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        text-decoration: none;
+        color: rgba(248, 250, 252, 0.72);
+        padding: 0.6rem 0.95rem 0.6rem 2.35rem;
+        border-radius: 10px;
+        font-family: 'Inter', -apple-system, sans-serif;
+        font-weight: 500;
+        font-size: 0.87rem;
+        transition: all 0.2s ease;
+    }
+
+    .nav-sublink i {
+        font-size: 0.5rem;
+        width: 8px;
+    }
+
+    .nav-sublink:hover {
+        background: rgba(255, 255, 255, 0.09);
+        color: white;
+    }
+
+    .nav-sublink.active {
+        background: rgba(16, 185, 129, 0.18);
+        color: white;
+        font-weight: 600;
     }
 
     .user-profile {
