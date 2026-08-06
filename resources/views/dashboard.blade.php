@@ -39,6 +39,31 @@
         font-size: 0.95rem;
     }
 
+    /* ---- Section wrapper ---- */
+    .dash-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .section-label {
+        font-family: var(--font-mono);
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e3e5ee;
+    }
+
     /* ---- Stat Cards ---- */
     .stat-card {
         border: none;
@@ -82,6 +107,10 @@
         font-size: 2.1rem;
         letter-spacing: -0.01em;
         margin-top: .35rem;
+    }
+
+    .stat-value.is-currency {
+        font-size: 1.45rem;
     }
 
     .icon-orb {
@@ -177,6 +206,8 @@
         font-weight: 600;
         padding: .45rem 1.1rem;
         transition: background .15s ease;
+        display: inline-flex;
+        align-items: center;
     }
 
     .btn-terapkan:hover {
@@ -209,6 +240,8 @@
         transition: background .15s ease;
     }
 
+    .riwayat-item:last-child { border-bottom: none; }
+
     .riwayat-item:hover { background: #f8f9fd; }
 
     .riwayat-dot {
@@ -234,6 +267,15 @@
         font-family: var(--font-mono);
         color: var(--muted);
         font-size: .74rem;
+    }
+
+    .riwayat-amount {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--ink);
+        font-size: .86rem;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .riwayat-footer {
@@ -265,6 +307,7 @@
     @media (max-width: 767px) {
         .content-wrap { padding: 1.25rem .9rem; }
         .stat-value { font-size: 1.7rem; }
+        .stat-value.is-currency { font-size: 1.2rem; }
         .date-range-filter { width: 100%; }
     }
 </style>
@@ -273,141 +316,201 @@
 
     <!-- Header -->
     <div class="page-head mb-4">
-        <h3>Dashboard</h3>
-        <p class="mb-0">Ringkasan penggunaan nomor surat</p>
+        <h3>Halaman Utama</h3>
     </div>
 
-    <!-- Statistik -->
-    <div class="row g-4 mb-4">
+    <div class="dash-section">
 
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Total Nomor Surat</div>
-                        <div class="stat-value">{{ $totalSurat }}</div>
-                        <div class="stat-trend {{ $trendPersen >= 0 ? 'up' : 'warn' }}">
-                            <i class="bi {{ $trendPersen >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
-                            {{ abs($trendPersen) }}% bulan ini
-                        </div>
-                    </div>
-                    <div class="icon-orb blue">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row g-4 mb-4">
 
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Surat Hari Ini</div>
-                        <div class="stat-value">{{ $suratHariIni }}</div>
-                        <div class="stat-trend up">
-                            <i class="bi bi-arrow-up-short"></i> Aktif
-                        </div>
-                    </div>
-                    <div class="icon-orb green">
-                        <i class="bi bi-calendar-check"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Sudah Upload</div>
-                        <div class="stat-value">{{ $sudahUpload }}</div>
-                        <div class="stat-trend up">
-                            <i class="bi bi-check2-circle"></i> {{ $persenUpload }}%
-                        </div>
-                    </div>
-                    <div class="icon-orb cyan">
-                        <i class="bi bi-cloud-check"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Belum Upload</div>
-                        <div class="stat-value">{{ $belumUpload }}</div>
-                        <div class="stat-trend warn">
-                            <i class="bi bi-exclamation-circle"></i> Perlu tindak lanjut
-                        </div>
-                    </div>
-                    <div class="icon-orb amber">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Grafik & Riwayat -->
-    <div class="row g-4">
-
-        <!-- Grafik -->
-        <div class="col-lg-8">
-            <div class="card panel-card h-100">
-
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="panel-title">Grafik Penggunaan Nomor Surat</h5>
-
-                    <div class="date-range-filter">
-                        <input type="date" id="startDate" value="{{ $defaultStart->toDateString() }}">
-                        <span class="date-sep">s/d</span>
-                        <input type="date" id="endDate" value="{{ $defaultEnd->toDateString() }}">
-                        <button type="button" class="btn-terapkan" id="applyDateRange">Terapkan</button>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    <div class="date-range-error" id="dateRangeError"></div>
-                    <canvas id="suratChart" height="300"></canvas>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Riwayat -->
-        <div class="col-lg-4">
-            <div class="card panel-card h-100">
-
-                <div class="card-header">
-                    <h5 class="panel-title">Riwayat Nomor Surat</h5>
-                </div>
-
-                <div class="card-body p-0">
-
-                    @forelse ($riwayatTerbaru as $surat)
-                        <div class="riwayat-item">
-                            <span class="riwayat-dot"></span>
-                            <div>
-                                <span class="riwayat-code">{{ $surat->nomor_surat }}</span>
-                                <span class="riwayat-date">
-                                    {{ \Carbon\Carbon::parse($surat->tanggal)->translatedFormat('d F Y') }}
-                                </span>
+            <div class="col-md-6 col-xl-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Total Nomor Surat</div>
+                            <div class="stat-value">{{ $totalSurat }}</div>
+                            <div class="stat-trend {{ $trendPersen >= 0 ? 'up' : 'warn' }}">
+                                <i class="bi {{ $trendPersen >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                                {{ abs($trendPersen) }}% bulan ini
                             </div>
                         </div>
-                    @empty
-                        <div class="riwayat-empty">Belum ada surat yang tercatat.</div>
-                    @endforelse
+                        <div class="icon-orb blue">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="riwayat-footer">
-                        <a href="{{ route('riwayatsurat') }}">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+            <div class="col-md-6 col-xl-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Surat Hari Ini</div>
+                            <div class="stat-value">{{ $suratHariIni }}</div>
+                            <div class="stat-trend up">
+                                <i class="bi bi-arrow-up-short"></i> Aktif
+                            </div>
+                        </div>
+                        <div class="icon-orb green">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Sudah Unggah</div>
+                            <div class="stat-value">{{ $sudahUpload }}</div>
+                            <div class="stat-trend up">
+                                <i class="bi bi-check2-circle"></i> {{ $persenUpload }}%
+                            </div>
+                        </div>
+                        <div class="icon-orb cyan">
+                            <i class="bi bi-cloud-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Belum Unggah</div>
+                            <div class="stat-value">{{ $belumUpload }}</div>
+                            <div class="stat-trend warn">
+                                <i class="bi bi-exclamation-circle"></i> Perlu tindak lanjut
+                            </div>
+                        </div>
+                        <div class="icon-orb amber">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Grafik & Riwayat Nomor Surat -->
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+                <div class="card panel-card h-100">
+
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="panel-title">Grafik Penggunaan Nomor Surat</h5>
+
+                        <div class="date-range-filter">
+                            <input type="date" id="startDate" value="{{ $defaultStart->toDateString() }}">
+                            <span class="date-sep">s/d</span>
+                            <input type="date" id="endDate" value="{{ $defaultEnd->toDateString() }}">
+                            <button type="button" class="btn-terapkan" id="applyDateRange">Terapkan</button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="date-range-error" id="dateRangeError"></div>
+                        <canvas id="suratChart" height="300"></canvas>
                     </div>
 
                 </div>
-
             </div>
+
+            <div class="col-lg-4">
+                <div class="card panel-card h-100">
+
+                    <div class="card-header">
+                        <h5 class="panel-title">Riwayat Nomor Surat</h5>
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        @forelse ($riwayatTerbaru as $surat)
+                            <div class="riwayat-item">
+                                <span class="riwayat-dot"></span>
+                                <div>
+                                    <span class="riwayat-code">{{ $surat->nomor_surat }}</span>
+                                    <span class="riwayat-date">
+                                        {{ \Carbon\Carbon::parse($surat->tanggal)->translatedFormat('d F Y') }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="riwayat-empty">Belum ada surat yang tercatat.</div>
+                        @endforelse
+
+                        <div class="riwayat-footer">
+                            <a href="{{ route('riwayatsurat') }}">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Grafik & Riwayat Arsip SPP -->
+        <div class="row g-4 mt-4">
+
+            <div class="col-lg-8">
+                <div class="card panel-card h-100">
+
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="panel-title">Grafik Arsip SPP</h5>
+
+                        <div class="date-range-filter">
+                            <input type="date" id="startDateSpp" value="{{ $defaultStart->toDateString() }}">
+                            <span class="date-sep">s/d</span>
+                            <input type="date" id="endDateSpp" value="{{ $defaultEnd->toDateString() }}">
+                            <button type="button" class="btn-terapkan" id="applyDateRangeSpp">Terapkan</button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="date-range-error" id="dateRangeErrorSpp"></div>
+                        <canvas id="sppChart" height="300"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card panel-card h-100">
+
+                    <div class="card-header">
+                        <h5 class="panel-title">Riwayat Arsip SPP</h5>
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        @forelse ($arsipTerbaru as $arsip)
+                            <div class="riwayat-item">
+                                <span class="riwayat-dot"></span>
+                                <div>
+                                    <span class="riwayat-code">{{ $arsip->nama_vendor ?? '-' }}</span>
+                                    <span class="riwayat-date">
+                                        {{ $arsip->document_no ?? '-' }} ·
+                                        {{ $arsip->tanggal_transaksi ? \Carbon\Carbon::parse($arsip->tanggal_transaksi)->translatedFormat('d F Y') : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="riwayat-empty">Belum ada arsip SPP yang tercatat.</div>
+                        @endforelse
+
+                        <div class="riwayat-footer">
+                            <a href="{{ route('arsipkasbon.index') }}">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -548,4 +651,127 @@ applyBtn.addEventListener('click', () => {
 
 </script>
 
+<script>
+
+const initialChartDataSpp = @json($chartDataSpp);
+const chartDataUrlSpp = "{{ route('dashboard.spp-chart-data') }}";
+
+const ctxSpp = document.getElementById('sppChart');
+
+const gradientSpp = ctxSpp.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientSpp.addColorStop(0, 'rgba(15,107,69,.28)');
+gradientSpp.addColorStop(1, 'rgba(15,107,69,0)');
+
+const chartSpp = new Chart(ctxSpp, {
+    type: 'line',
+    data: {
+        labels: initialChartDataSpp.labels,
+        datasets: [{
+            label: 'Arsip SPP',
+            data: initialChartDataSpp.data,
+            borderColor: '#0f6b45',
+            backgroundColor: gradientSpp,
+            fill: true,
+            tension: 0.45,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#0f6b45',
+            pointBorderWidth: 2,
+            borderWidth: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1a1d29',
+                titleFont: { weight: '600', family: "'Inter', sans-serif" },
+                bodyFont: { family: "'IBM Plex Mono', monospace" },
+                padding: 10,
+                cornerRadius: 10,
+                displayColors: false
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { color: '#8a8fa3', font: { size: 12, family: "'IBM Plex Mono', monospace" } }
+            },
+            y: {
+                beginAtZero: true,
+                suggestedMax: 5,
+                ticks: {
+                    color: '#8a8fa3',
+                    font: { size: 12, family: "'IBM Plex Mono', monospace" },
+                    stepSize: 1,
+                    precision: 0
+                },
+                grid: { color: '#eef0f6' },
+                border: { display: false }
+            }
+        }
+    }
+});
+
+const startDateInputSpp = document.getElementById('startDateSpp');
+const endDateInputSpp = document.getElementById('endDateSpp');
+const applyBtnSpp = document.getElementById('applyDateRangeSpp');
+const errorBoxSpp = document.getElementById('dateRangeErrorSpp');
+
+function showErrorSpp(message) {
+    errorBoxSpp.textContent = message;
+    errorBoxSpp.style.display = 'block';
+}
+
+function clearErrorSpp() {
+    errorBoxSpp.style.display = 'none';
+    errorBoxSpp.textContent = '';
+}
+
+applyBtnSpp.addEventListener('click', () => {
+    const start = startDateInputSpp.value;
+    const end = endDateInputSpp.value;
+
+    clearErrorSpp();
+
+    if (!start || !end) {
+        showErrorSpp('Pilih tanggal mulai dan tanggal akhir dulu.');
+        return;
+    }
+
+    if (start > end) {
+        showErrorSpp('Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+        return;
+    }
+
+    applyBtnSpp.disabled = true;
+    applyBtnSpp.textContent = 'Memuat...';
+
+    fetch(`${chartDataUrlSpp}?start=${start}&end=${end}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(res => {
+            if (!res.ok) throw new Error('Gagal mengambil data.');
+            return res.json();
+        })
+        .then(json => {
+            chartSpp.data.labels = json.labels;
+            chartSpp.data.datasets[0].data = json.data;
+            chartSpp.update();
+        })
+        .catch(() => {
+            showErrorSpp('Gagal memuat data untuk rentang tanggal ini.');
+        })
+        .finally(() => {
+            applyBtnSpp.disabled = false;
+            applyBtnSpp.textContent = 'Terapkan';
+        });
+});
+
+</script>
 @endsection

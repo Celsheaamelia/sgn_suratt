@@ -559,14 +559,20 @@
 
                             {{-- Nomor urut (readonly, otomatis dari server) — 3 digit --}}
                             <div class="mb-4">
-                                <label class="form-label">Nomor Urut</label>
+                                <label for="nomorUrut" class="form-label">
+                                    Nomor Urut <span class="ledger-required">*</span>
+                                </label>
                                 <input
                                     id="nomorUrut"
-                                    type="text"
-                                    value="{{ str_pad($nextSequence,3,'0',STR_PAD_LEFT) }}"
+                                    name="nomor_urut"
+                                    type="number"
+                                    min="1"
+                                    value="{{ old('nomor_urut', $nextSequence) }}"
                                     class="form-control"
-                                    readonly>
-                                <div class="ledger-help">Nomor urut ini otomatis, berdasarkan surat terakhir yang dibuat di tanggal yang dipilih.</div>
+                                    required>
+                                <div class="ledger-help" id="nomorUrutHelp">
+                                    Nomor #{{ str_pad($nextSequence, 3, '0', STR_PAD_LEFT) }} tersedia paling awal untuk tanggal ini. Bisa diganti kalau mau pakai nomor lain.
+                                </div>
                             </div>
 
                             <div class="d-flex align-items-center justify-content-end gap-3">
@@ -672,6 +678,12 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
+    new Choices('#signatory', {
+        searchEnabled: true,
+        itemSelectText: '',
+        shouldSort: false,
+    });
+
     new Choices('#kode_tujuan', {
         searchEnabled: true,
         itemSelectText: '',
@@ -690,21 +702,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const tanggalEl = document.getElementById('tanggal');
 
     const nomorUrut = document.getElementById('nomorUrut');
+    const nomorUrutHelp = document.getElementById('nomorUrutHelp');
     const previewNumber = document.getElementById('previewNumber');
+    const submitBtn = document.querySelector('#suratForm button[type="submit"]');
 
     let seqText = "{{ str_pad($nextSequence,3,'0',STR_PAD_LEFT) }}";
+    let terpakaiNumbers = [];
+    let direservasiNumbers = [];
 
+    function pad(n){
+        return String(n).padStart(3, '0');
+    }
 
     function selectedKode(select){
         if(select.selectedIndex==-1) return "-";
-
         return select.options[select.selectedIndex].dataset.kode ?? "-";
     }
 
     function formatTanggal(tanggal){
-
         if(!tanggal) return "--------";
-
         return tanggal.replaceAll("-","");
     }
 
@@ -723,43 +739,80 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("previewTanggal").innerHTML = tanggalEl.value;
     }
 
-    async function loadSequence(){
+    async function loadUsedNumbers(){
 
-        if(!tanggalEl.value) return;
+        if(!tanggalEl.value){
+            terpakaiNumbers = [];
+            direservasiNumbers = [];
+            return;
+        }
 
         try{
-
             let response = await fetch(
-                `{{ route('surat.next-sequence') }}?tanggal=${tanggalEl.value}`
+                `{{ route('surat.cek-status-nomor') }}?tanggal=${tanggalEl.value}`
             );
 
             if (!response.ok) {
-                throw new Error('Gagal mengambil nomor urut (HTTP ' + response.status + ')');
+                throw new Error('Gagal cek status nomor (HTTP ' + response.status + ')');
             }
 
             let data = await response.json();
 
-            seqText = data.sequence;
-
-            nomorUrut.value = seqText;
+            terpakaiNumbers = data.terpakai ?? [];
+            direservasiNumbers = data.direservasi ?? [];
 
         }catch(err){
-
             console.log(err);
-
-        }finally{
-            updatePreview();
-
+            terpakaiNumbers = [];
+            direservasiNumbers = [];
         }
-
     }
 
-    signEl.addEventListener("change",updatePreview);
-    tujuanEl.addEventListener("change",updatePreview);
-    klasifikasiEl.addEventListener("change",updatePreview);
+    function checkNomorStatus(){
 
-    tanggalEl.addEventListener("change",loadSequence);
-    loadSequence();
+        let nomor = parseInt(nomorUrut.value);
+        seqText = pad(nomor || 0);
+
+        if(!nomor){
+            nomorUrutHelp.textContent = 'Isi nomor urut.';
+            nomorUrutHelp.style.color = '';
+            if (submitBtn) submitBtn.disabled = false;
+            updatePreview();
+            return;
+        }
+
+        if (terpakaiNumbers.includes(nomor)) {
+            nomorUrutHelp.textContent = `Nomor #${pad(nomor)} sudah dipakai.`;
+            nomorUrutHelp.style.color = 'var(--danger)';
+            if (submitBtn) submitBtn.disabled = true;
+        } else if (direservasiNumbers.includes(nomor)) {
+            nomorUrutHelp.textContent = `Nomor #${pad(nomor)} sudah dicadangkan. Pilih nomor lain.`;
+            nomorUrutHelp.style.color = 'var(--danger)';
+            if (submitBtn) submitBtn.disabled = true;
+        } else {
+            nomorUrutHelp.textContent = `Nomor #${pad(nomor)} tersedia.`;
+            nomorUrutHelp.style.color = 'var(--success)';
+            if (submitBtn) submitBtn.disabled = false;
+        }
+
+        updatePreview();
+    }
+
+    signEl.addEventListener("change", updatePreview);
+    tujuanEl.addEventListener("change", updatePreview);
+    klasifikasiEl.addEventListener("change", updatePreview);
+
+    tanggalEl.addEventListener("change", async function(){
+        await loadUsedNumbers();
+        checkNomorStatus();
+    });
+
+    nomorUrut.addEventListener("input", checkNomorStatus);
+
+    (async function init(){
+        await loadUsedNumbers();
+        checkNomorStatus();
+    })();
 
 });
 </script>

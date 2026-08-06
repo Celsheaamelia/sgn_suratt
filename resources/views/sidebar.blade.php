@@ -6,7 +6,6 @@
             </div>
             <div>
                 <h4>Sistem Surat</h4>
-                <small>Panel Admin</small>
             </div>
         </div>
 
@@ -14,45 +13,39 @@
             <li>
                 <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
+                    <span>Halaman Utama</span>
                 </a>
             </li>
 
             @php
-                $manajemenSuratActive = request()->routeIs('tambahsurat') || request()->routeIs('keepnomorsurat');
+                $manajemenSuratActive = request()->routeIs('tambahsurat') || request()->routeIs('keepnomorsurat') || request()->routeIs('riwayatsurat');
             @endphp
             <li class="nav-group">
-                <a href="#manajemenSuratMenu"
-                   class="nav-link nav-link-parent {{ $manajemenSuratActive ? 'active' : '' }}"
-                   data-bs-toggle="collapse"
-                   role="button"
-                   aria-expanded="{{ $manajemenSuratActive ? 'true' : 'false' }}"
-                   aria-controls="manajemenSuratMenu">
+                <div class="nav-link nav-link-parent nav-link-static {{ $manajemenSuratActive ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Manajemen Surat</span>
-                    <i class="bi bi-chevron-down nav-caret"></i>
-                </a>
+                </div>
 
-                <div class="collapse {{ $manajemenSuratActive ? 'show' : '' }}" id="manajemenSuratMenu">
+                <div id="manajemenSuratMenu">
                     <ul class="nav-submenu">
                         <li>
                             <a href="{{ route('tambahsurat') }}"
                                class="nav-sublink {{ request()->routeIs('tambahsurat') ? 'active' : '' }}">
-                                <i class="bi bi-dot"></i>
+                                <i class="bi bi-file-earmark-plus"></i>
                                 <span>Buat Nomor Surat</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('keepnomorsurat') }}"
                                class="nav-sublink {{ request()->routeIs('keepnomorsurat') ? 'active' : '' }}">
-                                <i class="bi bi-dot"></i>
-                                <span>Keep Nomor Surat</span>
+                                <i class="bi bi-file-earmark"></i>
+                                <span>Cadangan Nomor Surat</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('riwayatsurat') }}"
                                 class="nav-sublink {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
-                                <i class="bi bi-dot"></i>
+                                <i class="bi bi-folder2-open"></i>
                                 <span>Riwayat Surat</span>
                             </a>
                         </li>
@@ -60,23 +53,108 @@
                 </div>
             </li>
 
-            {{-- <li>
-                <a href="{{ route('riwayatsurat') }}" class="nav-link {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
-                    <i class="bi bi-folder2-open"></i>
-                    <span>Riwayat Surat</span>
-                </a>
-            </li> --}}
+            @php
+                $manajemenKontrakActive = request()->routeIs('kontrak.*') || request()->routeIs('karyawan.*');
+            @endphp
+            <li class="nav-group">
+                <div class="nav-link nav-link-parent nav-link-static {{ $manajemenKontrakActive ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-ruled"></i>
+                    <span>Manajemen Kontrak</span>
+                </div>
+
+                <div id="manajemenKontrakMenu">
+                    <ul class="nav-submenu">
+                        <li>
+                            <a href="{{ route('kontrak.create') }}"
+                               class="nav-sublink {{ request()->routeIs('kontrak.create') || request()->routeIs('kontrak.store') ? 'active' : '' }}">
+                                <i class="bi bi-file-earmark-plus"></i>
+                                <span>Buat Kontrak</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('kontrak.index') }}"
+                               class="nav-sublink {{ request()->routeIs('kontrak.index') || request()->routeIs('kontrak.show') || request()->routeIs('kontrak.upload.form') ? 'active' : '' }}">
+                                <i class="bi bi-folder2-open"></i>
+                                <span>Daftar Kontrak</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('karyawan.index') }}"
+                               class="nav-sublink {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                                <i class="bi bi-people"></i>
+                                <span>Data Karyawan</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-group">
+                <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('arsipkasbon.*') ? 'active' : '' }}">
+                    <i class="bi bi-receipt"></i>
+                    <span class="flex-grow-1">Surat Permintaan Pembayaran</span>
+                </div>
+                <div id="arsipSppSubmenu">
+                    <ul class="nav-submenu">
+                        <li>
+                            <a href="{{ route('arsipkasbon.create') }}"
+                               class="nav-sublink {{ request()->routeIs('arsipkasbon.create') ? 'active' : '' }}">
+                                <i class="bi bi-camera"></i>
+                                <span>Unggah Surat Baru</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('arsipkasbon.index') }}"
+                               class="nav-sublink {{ request()->routeIs('arsipkasbon.index') || request()->routeIs('arsipkasbon.show') ? 'active' : '' }}">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Riwayat Arsip SPP</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-group">
+                <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('wisma-tamu.*') ? 'active' : '' }}">
+                    <i class="bi bi-building"></i>
+                    <span>Wisma Tamu</span>
+                </div>
+                <div id="wismaTamuMenu">
+                    <ul class="nav-submenu">
+                        <li>
+                            <a href="{{ route('wisma-tamu.create') }}"
+                               class="nav-sublink {{ request()->routeIs('wisma-tamu.create') || request()->routeIs('wisma-tamu.store') ? 'active' : '' }}">
+                                <i class="bi bi-person-plus"></i>
+                                <span>Input Tamu</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('wisma-tamu.index') }}"
+                               class="nav-sublink {{ request()->routeIs('wisma-tamu.index') || request()->routeIs('wisma-tamu.edit') ? 'active' : '' }}">
+                                <i class="bi bi-door-open"></i>
+                                <span>Daftar Kamar &amp; Tamu</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('wisma-tamu.tv') }}" target="_blank" class="nav-sublink">
+                                <i class="bi bi-tv"></i>
+                                <span>Buka Tampilan TV</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
 
         </ul>
     </div>
 
-    {{-- <div class="user-profile">
+    <div class="user-profile">
         <div class="avatar">A</div>
         <div class="user-meta">
-            <strong>Administrator</strong>
-            <small>Online</small>
+            <strong>Admin</strong>
+            {{-- <small>Online</small> --}}
         </div>
-    </div> --}}
+    </div>
 </aside>
 
 <style>
@@ -169,6 +247,10 @@
         transform: translateX(2px);
     }
 
+    .nav-link-static:hover {
+        transform: none;
+    }
+
     .nav-link.active {
         background: linear-gradient(135deg, #10b981, #047857);
         color: white;
@@ -187,58 +269,53 @@
     }
 
     .nav-link-parent {
-        cursor: pointer;
-        position: relative;
+        cursor: default;
     }
 
-    .nav-caret {
-        margin-left: auto;
-        font-size: 0.75rem !important;
-        width: auto !important;
-        transition: transform 0.2s ease;
-    }
-
-    .nav-link-parent[aria-expanded="true"] .nav-caret {
-        transform: rotate(180deg);
+    .nav-link-static {
+        margin-bottom: 0.1rem;
     }
 
     .nav-submenu {
         list-style: none;
-        margin: 0.3rem 0 0.15rem 0;
-        padding: 0;
+        margin: 0.35rem 0 0.15rem;
+        padding: 0 0 0 1.6rem;
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
+        gap: 0.3rem;
+        border-left: 1px solid rgba(255, 255, 255, 0.14);
+        margin-left: 1.15rem;
     }
 
     .nav-sublink {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        text-decoration: none;
-        color: rgba(248, 250, 252, 0.72);
-        padding: 0.6rem 0.95rem 0.6rem 2.35rem;
-        border-radius: 10px;
-        font-family: 'Inter', -apple-system, sans-serif;
-        font-weight: 500;
-        font-size: 0.87rem;
-        transition: all 0.2s ease;
-    }
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: rgba(248, 250, 252, 0.75);
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
 
     .nav-sublink i {
-        font-size: 0.5rem;
-        width: 8px;
+        font-size: 0.85rem;
+        width: 16px;
+        text-align: center;
     }
 
     .nav-sublink:hover {
-        background: rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.1);
         color: white;
     }
 
     .nav-sublink.active {
-        background: rgba(16, 185, 129, 0.18);
+        background: linear-gradient(135deg, #10b981, #047857);
         color: white;
-        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(4, 120, 87, 0.18);
     }
 
     .user-profile {
@@ -279,10 +356,20 @@
 
     @media (max-width: 767px) {
         .sidebar {
-            position: static;
-            width: 100%;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
             height: auto;
-            box-shadow: none;
+            box-shadow: 18px 0 40px rgba(6, 78, 59, 0.25);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1050;
+        }
+
+        .sidebar.sidebar-open {
+            transform: translateX(0);
         }
     }
 </style>

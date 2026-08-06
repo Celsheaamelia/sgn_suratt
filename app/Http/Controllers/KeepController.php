@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\KeepNomorSurat;
+use App\Models\RiwayatSurat;
 use App\Models\Penandatangan;
 use App\Models\TujuanSurat;
 use App\Models\KlasifikasiSurat;
-use App\Models\RiwayatSurat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -18,26 +17,32 @@ class KeepController extends Controller
     public function keepNomorSurat()
     {
         $penandatanganList = Penandatangan::orderByRaw("
-        CASE
-            WHEN jabatan = 'General Manager' THEN 1
-            WHEN jabatan = 'Manager' THEN 2
-            WHEN jabatan = 'Asisten Manager' THEN 3
-            ELSE 4
-        END
-    ")->get();
-        $tujuanList        = TujuanSurat::orderBy('kode')->get();
-        $klasifikasiList   = KlasifikasiSurat::orderBy('kode')->get();
+            CASE
+                WHEN jabatan = 'General Manager' THEN 1
+                WHEN jabatan = 'Manager' THEN 2
+                WHEN jabatan = 'Asisten Manager' THEN 3
+                ELSE 4
+            END
+        ")->get();
 
-        $keepList = KeepNomorSurat::with('signatory')
+        $tujuanList      = TujuanSurat::orderBy('kode')->get();
+        $klasifikasiList = KlasifikasiSurat::orderBy('kode')->get();
+
+        $keepList = RiwayatSurat::with(['penandatangan', 'tujuanSurat', 'klasifikasiSurat'])
+            ->where('status', 'Direservasi')
             ->orderByDesc('tanggal')
-            ->orderBy('nomor')
+            ->orderBy('nomor_surat')
             ->get();
+
+        $tanggal      = now()->toDateString();
+        $nextSequence = $this->nextAvailableSequence($tanggal);
 
         return view('keepnomorsurat', compact(
             'penandatanganList',
             'tujuanList',
             'klasifikasiList',
-            'keepList'
+            'keepList',
+            'nextSequence'
         ));
     }
 
@@ -45,79 +50,98 @@ class KeepController extends Controller
     {
         $validated = $request->validate([
             'signatory'   => 'required|exists:penandatangan,id',
+            'kode_tujuan' => 'required|exists:tujuan_surats,id',
+            'klasifikasi' => 'required|exists:klasifikasi_surat,id',
             'tanggal'     => 'required|date',
+            'perihal'     => 'required|string|max:255',
             'nomor_awal'  => 'required|integer|min:1',
             'nomor_akhir' => 'required|integer|min:1|gte:nomor_awal',
         ]);
 
-        $used      = $this->usedNumbersForDate($validated['tanggal']);
         $requested = range($validated['nomor_awal'], $validated['nomor_akhir']);
-        $conflict  = array_values(array_intersect($requested, $used));
+        $grouped   = $this->groupedUsedNumbersForDate($validated['tanggal']);
 
-        if (!empty($conflict)) {
-            sort($conflict);
-            $list = implode(', #', array_map(fn ($n) => str_pad($n, 3, '0', STR_PAD_LEFT), $conflict));
+        $conflictTerpakai    = array_values(array_intersect($requested, $grouped['terpakai']));
+        $conflictDireservasi = array_values(array_intersect($requested, $grouped['direservasi']));
+
+        if (!empty($conflictTerpakai) || !empty($conflictDireservasi)) {
+            $messages = [];
+
+            if (!empty($conflictTerpakai)) {
+                $list = implode(', #', array_map(fn ($n) => str_pad($n, 3, '0', STR_PAD_LEFT), $conflictTerpakai));
+                $messages[] = "Nomor #{$list} sudah dipakai (sudah jadi surat).";
+            }
+
+            if (!empty($conflictDireservasi)) {
+                $list = implode(', #', array_map(fn ($n) => str_pad($n, 3, '0', STR_PAD_LEFT), $conflictDireservasi));
+                $messages[] = "Nomor #{$list} sudah di-keep oleh orang lain.";
+            }
 
             return back()
                 ->withInput()
-                ->with('error', "Nomor #{$list} di tanggal ini sudah dipakai atau sudah di-keep. Pilih rentang lain.");
+                ->with('error', implode(' ', $messages) . ' Pilih rentang lain.');
         }
 
-        foreach ($requested as $nomor) {
-            KeepNomorSurat::create([
-                'signatory_id' => $validated['signatory'],
-                'tanggal'      => $validated['tanggal'],
-                'nomor'        => $nomor,
-                'status'       => 'aktif',
-            ]);
-        }
+        $penandatangan = Penandatangan::findOrFail($validated['signatory']);
+        $tujuan        = TujuanSurat::findOrFail($validated['kode_tujuan']);
+        $klasifikasi   = KlasifikasiSurat::findOrFail($validated['klasifikasi']);
 
-        return redirect()
-            ->route('keepnomorsurat')
-            ->with('success', 'Nomor berhasil di-keep.');
-    }
+        $tanggalFormatted = date('Ymd', strtotime($validated['tanggal']));
 
-    public function gunakanKeepNomor(Request $request, $id)
-    {
-        $keep = KeepNomorSurat::with('signatory')->findOrFail($id);
+        DB::transaction(function () use ($requested, $validated, $penandatangan, $tujuan, $klasifikasi, $tanggalFormatted) {
+            foreach ($requested as $nomor) {
+                $urutPad = str_pad($nomor, 3, '0', STR_PAD_LEFT);
 
-        if ($keep->status !== 'aktif') {
-            return back()->with('error', 'Nomor ini sudah terpakai.');
-        }
+                $nomorSurat = $penandatangan->kode . '-' .
+                    $tujuan->kode . '-' .
+                    $klasifikasi->kode . '/' .
+                    $tanggalFormatted . '.' .
+                    $urutPad;
 
-        $validated = $request->validate([
-            'perihal'     => 'required|string|max:255',
-            'kode_tujuan' => 'required|exists:tujuan_surats,id',
-            'klasifikasi' => 'required|exists:klasifikasi_surat,id',
-        ]);
-
-        $tujuan      = TujuanSurat::findOrFail($validated['kode_tujuan']);
-        $klasifikasi = KlasifikasiSurat::findOrFail($validated['klasifikasi']);
-
-        $nomorUrutPad     = str_pad($keep->nomor, 3, '0', STR_PAD_LEFT);
-        $tanggalFormatted = $keep->tanggal->format('Ymd');
-
-        $nomorSurat = "{$keep->signatory->kode}-{$tujuan->kode}-{$klasifikasi->kode}/{$tanggalFormatted}.{$nomorUrutPad}";
-
-        DB::transaction(function () use ($validated, $keep, $tujuan, $klasifikasi, $nomorSurat) {
-
-            RiwayatSurat::create([
-                'perihal'              => $validated['perihal'],
-                'penandatangan_id'     => $keep->signatory_id,
-                'tujuan_surat_id'      => $tujuan->id,
-                'klasifikasi_surat_id' => $klasifikasi->id,
-                'tanggal'              => $keep->tanggal,
-                'nomor_surat'          => $nomorSurat,
-                'user_id'              => Auth::id(),
-            ]);
-
-            $keep->update(['status' => 'terpakai']);
+                RiwayatSurat::create([
+                    'nomor_surat'          => $nomorSurat,
+                    'perihal'              => $validated['perihal'],
+                    'tanggal'              => $validated['tanggal'],
+                    'penandatangan_id'     => $penandatangan->id,
+                    'tujuan_surat_id'      => $tujuan->id,
+                    'klasifikasi_surat_id' => $klasifikasi->id,
+                    'user_id'              => Auth::id(),
+                    'status'               => 'Direservasi',
+                ]);
+            }
         });
 
+        $jumlah = count($requested);
+
+        $tanggalFormatted2 = date('Ymd', strtotime($validated['tanggal']));
+        $createdNumbers = collect($requested)->map(function ($nomor) use ($penandatangan, $tujuan, $klasifikasi, $tanggalFormatted2) {
+            return $penandatangan->kode . '-' .
+                $tujuan->kode . '-' .
+                $klasifikasi->kode . '/' .
+                $tanggalFormatted2 . '.' .
+                str_pad($nomor, 3, '0', STR_PAD_LEFT);
+        })->all();
+
         return redirect()
             ->route('keepnomorsurat')
-            ->with('success', "Surat berhasil dibuat dengan nomor {$nomorSurat}.")
-            ->with('created_nomor', $nomorSurat);
+            ->with('success', "{$jumlah} nomor berhasil dicadangkan.")
+            ->with('created_numbers', $createdNumbers);
+    }
+
+    public function cancelKeepNomor($id)
+    {
+        $surat = RiwayatSurat::findOrFail($id);
+
+        if ($surat->status !== 'Direservasi') {
+            return back()->with('error', 'Nomor ini sudah terpakai dan tidak bisa dibatalkan.');
+        }
+
+        $nomor = $surat->nomor_surat;
+        $surat->delete();
+
+        return redirect()
+            ->route('keepnomorsurat')
+            ->with('success', "cadangan nomor {$nomor} berhasil dibatalkan.");
     }
 
     public function cekNomorTerpakai(Request $request)
@@ -126,8 +150,8 @@ class KeepController extends Controller
             'tanggal' => 'required|date',
         ]);
 
-        return response()->json([
-            'used' => $this->usedNumbersForDate($request->tanggal),
-        ]);
+        return response()->json(
+            $this->groupedUsedNumbersForDate($request->tanggal)
+        );
     }
 }

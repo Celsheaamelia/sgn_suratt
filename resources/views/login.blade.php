@@ -235,6 +235,10 @@
                         Masuk
                     </button>
                 </form>
+                    <p class="text-center small text-muted mt-3 mb-0">
+                        Belum punya akun?
+                        <a href="{{ route('register') }}" class="link-brand">Daftar di sini</a>
+                    </p>
             </div>
         </div>
 

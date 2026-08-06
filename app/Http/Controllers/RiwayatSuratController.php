@@ -10,20 +10,31 @@ use App\Models\KlasifikasiSurat;
 use App\Models\DetailSurat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\RiwayatSuratExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RiwayatSuratController extends Controller
 {
 
     use NomorUrut;
 
-    public function index()
+    public function index(Request $request)
     {
         $suratList = RiwayatSurat::with([
             'penandatangan',
             'tujuanSurat',
             'klasifikasiSurat',
             'detailSurat'
-        ])->latest()->get();
+        ])
+            ->when($request->tanggal_dari, function ($q) use ($request) {
+                $q->whereDate('tanggal', '>=', $request->tanggal_dari);
+            })
+            ->when($request->tanggal_sampai, function ($q) use ($request) {
+                $q->whereDate('tanggal', '<=', $request->tanggal_sampai);
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         $klasifikasiList = KlasifikasiSurat::orderBy('kode')->get();
 
@@ -71,44 +82,58 @@ class RiwayatSuratController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'perihal' => 'required',
-        'signatory' => 'required',
-        'kode_tujuan' => 'required',
-        'klasifikasi' => 'required',
-        'tanggal' => 'required|date|date_equals:today',
-    ]);
+    {
+        $request->validate([
+            'perihal'     => 'required',
+            'signatory'   => 'required',
+            'kode_tujuan' => 'required',
+            'klasifikasi' => 'required',
 
-    $urut = str_pad($this->nextAvailableSequence($request->tanggal), 3, '0', STR_PAD_LEFT);
+            'tanggal'     => 'required|date',
+            'nomor_urut'  => 'required|integer|min:1',
+        ]);
 
-    // Ambil data berdasarkan ID yang dipilih di form
-    $penandatangan = Penandatangan::find($request->signatory);
-    $tujuan = TujuanSurat::find($request->kode_tujuan);
-    $klasifikasi = KlasifikasiSurat::find($request->klasifikasi);
+        $nomorInt = (int) $request->nomor_urut;
+        $grouped  = $this->groupedUsedNumbersForDate($request->tanggal);
 
-    // Format baru: PENANDATANGAN-TUJUAN-KLASIFIKASI/YYYYMMDD.SEQ
-    // Contoh: SG26-BD05-SKP/20260710.004
-    $nomor = $penandatangan->kode . '-' .
-            $tujuan->kode . '-' .
-            $klasifikasi->kode . '/' .
-            date('Ymd', strtotime($request->tanggal)) . '.' .
-            $urut;
+        if (in_array($nomorInt, $grouped['terpakai'])) {
+            return back()->withInput()->with('error',
+                'Nomor #' . str_pad($nomorInt, 3, '0', STR_PAD_LEFT) . ' sudah dipakai (sudah jadi surat).'
+            );
+        }
 
-    RiwayatSurat::create([
-        'nomor_surat' => $nomor,
-        'perihal' => $request->perihal,
-        'tanggal' => $request->tanggal,
-        'penandatangan_id' => $request->signatory,
-        'tujuan_surat_id' => $request->kode_tujuan,
-        'klasifikasi_surat_id' => $request->klasifikasi,
-        'user_id' => Auth::id(),
-    ]);
+        if (in_array($nomorInt, $grouped['direservasi'])) {
+            return back()->withInput()->with('error',
+                'Nomor #' . str_pad($nomorInt, 3, '0', STR_PAD_LEFT) . ' sudah di-keep. Pilih nomor lain.'
+            );
+        }
 
-    return redirect()->route('tambahsurat')
-        ->with('success', 'Surat berhasil dibuat.')
-        ->with('created_nomor', $nomor);
-}
+        $urut = str_pad($nomorInt, 3, '0', STR_PAD_LEFT);
+
+        $penandatangan = Penandatangan::find($request->signatory);
+        $tujuan        = TujuanSurat::find($request->kode_tujuan);
+        $klasifikasi   = KlasifikasiSurat::find($request->klasifikasi);
+
+        $nomor = $penandatangan->kode . '-' .
+                $tujuan->kode . '-' .
+                $klasifikasi->kode . '/' .
+                date('Ymd', strtotime($request->tanggal)) . '.' .
+                $urut;
+
+        RiwayatSurat::create([
+            'nomor_surat'          => $nomor,
+            'perihal'              => $request->perihal,
+            'tanggal'              => $request->tanggal,
+            'penandatangan_id'     => $request->signatory,
+            'tujuan_surat_id'      => $request->kode_tujuan,
+            'klasifikasi_surat_id' => $request->klasifikasi,
+            'user_id'              => Auth::id(),
+        ]);
+
+        return redirect()->route('tambahsurat')
+            ->with('success', 'Surat berhasil dibuat.')
+            ->with('created_nomor', $nomor);
+    }
 
     public function showUpload($id)
     {
@@ -176,4 +201,31 @@ class RiwayatSuratController extends Controller
             'sequence' => str_pad($this->nextAvailableSequence($request->tanggal), 3, '0', STR_PAD_LEFT)
         ]);
     }
+
+    public function cekStatusNomor(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+        ]);
+
+        return response()->json(
+            $this->groupedUsedNumbersForDate($request->tanggal)
+        );
+    }
+
+    public function exportExcel(Request $request)
+{
+    $filename = 'riwayat-surat-' . now()->format('Y-m-d_His') . '.xlsx';
+
+    return Excel::download(
+        new RiwayatSuratExport(
+            $request->query('search'),
+            $request->query('klasifikasi'),
+            $request->query('sort', 'desc'),
+            $request->query('tanggal_dari'),
+            $request->query('tanggal_sampai')
+        ),
+        $filename
+    );
+}
 }

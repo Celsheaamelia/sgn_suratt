@@ -47,14 +47,6 @@ return [
             'report' => false,
         ],
 
-'public_direct' => [
-    'driver' => 'local',
-    'root' => base_path('uploads'),
-    'url' => env('APP_URL').'/uploads',
-    'visibility' => 'public',
-    'throw' => false,
-],
-
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -24,12 +24,14 @@
         --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
     }
 
-    /* .ledger-page {
-        background: var(--ledger);
-        font-family: var(--font-body);
-        color: var(--ink);
-        min-height: 100vh;
-    } */
+    .ledger-status-pill.is-uploaded { ... hijau ... }
+    .ledger-status-pill.is-pending  { ... merah ... }
+
+    .ledger-status-pill.is-reserved {
+        background: var(--brass-tint);
+        color: var(--brass-dark);
+        border: 1px solid rgba(169,129,47,0.25);
+    }
 
     .ledger-breadcrumb {
         background: transparent;
@@ -322,6 +324,8 @@
         padding: 0.9rem 1.5rem;
     }
 
+
+
     @media (prefers-reduced-motion: reduce) {
         * { transition: none !important; }
     }
@@ -358,7 +362,25 @@
         @endif
 
         @php
-            $isUploaded = ($surat->status ?? 'Belum Terupload') === 'Terupload';
+            $statusValue = $surat->status ?? 'Belum Terupload';
+
+            $statusClass = match($statusValue) {
+                'Terupload'    => 'is-uploaded',
+                'Direservasi'  => 'is-reserved',
+                default        => 'is-pending',
+            };
+
+            $statusLabel = match($statusValue) {
+                'Terupload'    => 'Terupload',
+                'Direservasi'  => 'Dicadangkan',
+                default        => 'Belum Terupload',
+            };
+
+            $statusIcon = match($statusValue) {
+                'Terupload'    => 'fa-circle-check',
+                'Direservasi'  => 'fa-clock',
+                default        => 'fa-circle-exclamation',
+            };
         @endphp
 
         <div class="row g-4">
@@ -373,9 +395,9 @@
                             <h2 class="ledger-title mb-1">Detail Surat</h2>
                             <p class="ledger-subtitle mb-0">{{ $surat->nomor_surat }}</p>
                         </div>
-                        <span class="ledger-status-pill {{ $isUploaded ? 'is-uploaded' : 'is-pending' }}">
-                            <i class="fa-solid {{ $isUploaded ? 'fa-circle-check' : 'fa-circle-exclamation' }}"></i>
-                            {{ $surat->status ?? 'Belum Terupload' }}
+                        <span class="ledger-status-pill {{ $statusClass }}">
+                            <i class="fa-solid {{ $statusIcon }}"></i>
+                            {{ $statusLabel }}
                         </span>
                     </div>
 

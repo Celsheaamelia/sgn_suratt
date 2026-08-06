@@ -13,19 +13,25 @@ class PenandatanganSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('penandatangan')->insert([
+        DB::table('penandatangan')->upsert([
             [
                 'kode' => 'SG26',
                 'jabatan' => 'General Manager',
+                'nama'     => 'Agus Amanda',
             ],
             [
                 'kode' => 'SG26F',
                 'jabatan' => 'Manager',
+                'nama' => null,
             ],
             [
                 'kode' => 'ASMAN',
                 'jabatan' => 'Asistan Manager',
+                'nama' => null,
             ],
-        ]);
+            ],
+            ['kode'], // kolom unik
+            ['jabatan', 'nama'] // kolom yang di-update jika kode sudah ada
+        );
     }
 }

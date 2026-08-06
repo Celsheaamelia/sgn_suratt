@@ -109,13 +109,46 @@
         border: 1px solid rgba(169,129,47,0.25);
     }
 
+    .ledger-status-pill.is-reserved {
+        background: var(--brass-tint);
+        color: var(--brass-dark);
+        border: 1px solid rgba(169,129,47,0.25);
+    }
+
     /* ==========================================================================
        Toolbar — same input styling language as Tambah Surat's form fields
        ========================================================================== */
 
+    .ledger-help {
+        color: var(--ink-soft);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .ledger-btn-ghost {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: var(--ink-soft);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 0.55rem;
+        padding: 0.65rem 0.95rem;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .ledger-btn-ghost:hover {
+        background: var(--ledger);
+        border-color: var(--ledger-line);
+        color: var(--ink);
+    }
+
     #searchInput,
     #filterKlasifikasi,
-    #sortOrder {
+    #sortOrder,
+    #filterTanggalDari,
+    #filterTanggalSampai {
         font-family: var(--font-body);
         color: var(--ink);
         background-color: var(--paper);
@@ -139,7 +172,9 @@
 
     #searchInput:focus,
     #filterKlasifikasi:focus,
-    #sortOrder:focus {
+    #sortOrder:focus,
+    #filterTanggalDari:focus,
+    #filterTanggalSampai:focus {
         outline: none;
         border-color: var(--brass);
         box-shadow: 0 0 0 3px rgba(169,129,47,0.16);
@@ -147,7 +182,9 @@
 
     #searchInput:focus-visible,
     #filterKlasifikasi:focus-visible,
-    #sortOrder:focus-visible {
+    #sortOrder:focus-visible,
+    #filterTanggalDari:focus-visible,
+    #filterTanggalSampai:focus-visible {
         outline: 2px solid var(--brass-dark);
         outline-offset: 2px;
     }
@@ -197,6 +234,12 @@
         padding: 1rem 1.5rem;
         vertical-align: middle;
         font-size: 0.9rem;
+    }
+
+    .ledger-table .ledger-no {
+        color: var(--ink-soft);
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
     }
 
     .ledger-table .ledger-nomor {
@@ -320,6 +363,87 @@
         overflow-x: auto;
     }
 
+    /* ==========================================================================
+       Pagination — override Bootstrap's default blue to match ledger theme
+       ========================================================================== */
+
+    #archiveCard .pagination {
+        gap: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    #archiveCard .page-item .page-link {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background-color: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    #archiveCard .page-item .page-link:hover {
+        background-color: var(--brass-tint);
+        color: var(--brass-dark);
+        border-color: rgba(169,129,47,0.35);
+    }
+
+    #archiveCard .page-item .page-link:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(169,129,47,0.16);
+        border-color: var(--brass);
+    }
+
+    #archiveCard .page-item.active .page-link {
+        background-color: var(--brass-dark);
+        border-color: var(--brass-dark);
+        color: #fff;
+    }
+
+    #archiveCard .page-item.disabled .page-link {
+        color: var(--ledger-line);
+        background-color: var(--paper);
+        border-color: var(--line);
+        opacity: 0.7;
+    }
+
+    #exportExcelBtn.btn-outline-secondary {
+        border-color: var(--ink);
+        color: var(--ink-soft);
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    #exportExcelBtn.btn-outline-secondary:hover {
+        background: var(--ink-soft);
+        border-color: rgba(28,43,35,0.04);
+        color: var(--brass-tint);
+    }
+
+    #exportExcelBtn.is-loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .export-spinner {
+        display: inline-block; width: 1.05rem; height: 1.05rem;
+        border: 2px solid rgba(169,129,47,0.25); border-top-color: var(--brass-dark);
+        border-radius: 50%; animation: export-spin 0.7s linear infinite;
+    }
+    @keyframes export-spin { to { transform: rotate(360deg); } }
+    .export-done-text {
+        font-size: 0.82rem; font-weight: 600; color: var(--success, #2f7d4f);
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        animation: export-fade-in 0.15s ease-in;
+    }
+    @keyframes export-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
     @media (prefers-reduced-motion: reduce) {
         * {
             transition: none !important;
@@ -345,9 +469,16 @@
                     <div>
                         <h2 class="ledger-title mb-1">Riwayat Surat</h2>
                     </div>
-                    <div id="totalCounter">
+                    <div class="d-flex align-items-center gap-2" id="totalCounter">
+                        <a href="#" id="exportExcelBtn" class="btn btn-outline-secondary">
+                            <i class="bi bi-file-earmark-excel"></i> Export Excel
+                        </a>
+                        <span class="export-spinner d-none" id="exportSpinner" role="status" aria-hidden="true"></span>
+                        <span class="export-done-text d-none" id="exportDoneText">
+                            <i class="bi bi-check-circle-fill"></i> Selesai
+                        </span>
                         <span class="ledger-badge">
-                            <span id="totalCount">{{ count($suratList ?? []) }}</span> surat tercatat
+                            <span id="totalCount">{{ $suratList->total() ?? 0 }}</span> surat tercatat
                         </span>
                     </div>
                 </div>
@@ -382,17 +513,32 @@
                             <option value="asc">Terlama dulu</option>
                         </select>
                     </div>
+
+                    <div class="col-md-3">
+                        <label for="filterTanggalDari" class="ledger-help mb-1 d-block">Dari tanggal</label>
+                        <input type="date" id="filterTanggalDari" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filterTanggalSampai" class="ledger-help mb-1 d-block">Sampai tanggal</label>
+                        <input type="date" id="filterTanggalSampai" class="form-control">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" id="resetTanggalBtn" class="btn ledger-btn-ghost w-100">
+                            Reset Tanggal
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Archive table --}}
         <div class="card ledger-card" id="archiveCard">
-            @if (count($suratList ?? []) > 0)
+            @if ($suratList->count() > 0)
                 <div class="ledger-table-scroll">
                     <table class="ledger-table">
                         <thead>
                             <tr>
+                                <th style="width:1%;">No</th>
                                 <th>Nomor Surat</th>
                                 <th>Perihal</th>
                                 <th>Tujuan</th>
@@ -404,37 +550,52 @@
                         </thead>
                         <tbody id="archiveList">
                             @foreach ($suratList as $surat)
-                                @php
-                                    $isUploaded = ($surat->status ?? 'Belum Terupload') === 'Terupload';
-                                @endphp
-                                <tr
-                                    data-perihal="{{ strtolower($surat->perihal) }}"
-                                    data-nomor="{{ strtolower($surat->nomor_surat) }}"
-                                    data-klasifikasi="{{ $surat->klasifikasiSurat->kode ?? '' }}"
-                                    data-tanggal="{{ $surat->tanggal }}">
-                                    <td class="ledger-nomor">{{ $surat->nomor_surat }}</td>
-                                    <td class="ledger-perihal">{{ $surat->perihal }}</td>
-                                    <td class="ledger-tujuan">{{ $surat->tujuanSurat->nama_tujuan ?? '-' }}</td>
-                                    <td class="ledger-signatory">{{ $surat->penandatangan->jabatan ?? '-' }}</td>
-                                    <td class="ledger-tanggal">{{ $surat->tanggal }}</td>
-                                    <td>
-                                        <span class="ledger-status-pill {{ $isUploaded ? 'is-uploaded' : 'is-pending' }}">
-                                            {{ $surat->status ?? 'Belum Terupload' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('surat.upload.show', $surat->id) }}" class="ledger-btn-detail">
-                                            <i class="fa-regular fa-eye"></i>
-                                            Detail
-                                        </a>
+                            @php
+                               $statusClass = match($surat->status ?? 'Belum Terupload') {
+                                    'Terupload'    => 'is-uploaded',
+                                    'Direservasi'  => 'is-reserved',
+                                    default        => 'is-pending',
+                                };
 
-                                    </td>
-
-                                </tr>
-                            @endforeach
+                                $statusLabel = match($surat->status ?? 'Belum Terupload') {
+                                    'Terupload'    => 'Terupload',
+                                    'Direservasi'  => 'Dicadangkan',
+                                    default        => 'Belum Terupload',
+                                };
+                            @endphp
+                            <tr
+                                data-perihal="{{ strtolower($surat->perihal) }}"
+                                data-nomor="{{ strtolower($surat->nomor_surat) }}"
+                                data-klasifikasi="{{ $surat->klasifikasiSurat->kode ?? '' }}"
+                                data-tanggal="{{ $surat->tanggal }}">
+                                <td class="ledger-no"></td>
+                                <td class="ledger-nomor">{{ $surat->nomor_surat }}</td>
+                                <td class="ledger-perihal">{{ $surat->perihal }}</td>
+                                <td class="ledger-tujuan">{{ $surat->tujuanSurat->nama_tujuan ?? '-' }}</td>
+                                <td class="ledger-signatory">{{ $surat->penandatangan->jabatan ?? '-' }}</td>
+                                <td class="ledger-tanggal">{{ $surat->tanggal }}</td>
+                                <td>
+                                    <span class="ledger-status-pill {{ $statusClass }}">
+                                        {{ $statusLabel }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ route('surat.upload.show', $surat->id) }}" class="ledger-btn-detail">
+                                        <i class="fa-regular fa-eye"></i>
+                                        Detail
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
+
+                @if ($suratList->hasPages())
+                    <div class="card-body">
+                        {{ $suratList->links() }}
+                    </div>
+                @endif
 
                 <div id="emptySearchState" class="d-none">
                     <div class="ledger-empty">
@@ -457,15 +618,51 @@
     const searchInput = document.getElementById('searchInput');
     const filterKlasifikasi = document.getElementById('filterKlasifikasi');
     const sortOrder = document.getElementById('sortOrder');
+    const filterTanggalDari = document.getElementById('filterTanggalDari');
+    const filterTanggalSampai = document.getElementById('filterTanggalSampai');
+    const resetTanggalBtn = document.getElementById('resetTanggalBtn');
     const archiveList = document.getElementById('archiveList');
     const emptySearchState = document.getElementById('emptySearchState');
     const totalCount = document.getElementById('totalCount');
+
+    // Nomor urut mengikuti halaman pagination yang lagi aktif, jadi kalau
+    // paginate-nya 10/halaman dan lagi di halaman 2, nomornya lanjut dari 11.
+    // Ambil dari elemen page-link yang aktif; fallback ke 1 kalau tidak ada pagination.
+    function currentPageOffset() {
+        const activePageLink = document.querySelector('#archiveCard .page-item.active .page-link');
+        if (!activePageLink) return 0;
+        const pageNum = parseInt(activePageLink.textContent.trim(), 10);
+        if (isNaN(pageNum)) return 0;
+        // Asumsi jumlah per halaman = jumlah baris di halaman pertama render awal.
+        const perPage = archiveList ? archiveList.querySelectorAll('tr').length : 0;
+        return (pageNum - 1) * perPage;
+    }
+
+    // Beri nomor urut 1,2,3... hanya untuk baris yang sedang terlihat (tidak
+    // ada class d-none), sesuai urutan tampil saat ini di DOM (setelah sort).
+    function renumberVisibleRows() {
+        if (!archiveList) return;
+        const offset = currentPageOffset();
+        let n = 1;
+        Array.from(archiveList.querySelectorAll('tr')).forEach(row => {
+            const noCell = row.querySelector('.ledger-no');
+            if (!noCell) return;
+            if (row.classList.contains('d-none')) {
+                noCell.textContent = '';
+            } else {
+                noCell.textContent = offset + n;
+                n++;
+            }
+        });
+    }
 
     function applyFilters() {
         if (!archiveList) return;
 
         const query = searchInput.value.trim().toLowerCase();
         const klasifikasi = filterKlasifikasi.value;
+        const tanggalDari = filterTanggalDari.value; // format YYYY-MM-DD, cocok buat dibandingkan string langsung
+        const tanggalSampai = filterTanggalSampai.value;
         const rows = Array.from(archiveList.querySelectorAll('tr'));
 
         let visibleCount = 0;
@@ -475,7 +672,12 @@
                 row.dataset.nomor.includes(query) ||
                 row.dataset.perihal.includes(query);
             const matchKlasifikasi = !klasifikasi || row.dataset.klasifikasi === klasifikasi;
-            const visible = matchQuery && matchKlasifikasi;
+
+            const rowTanggal = (row.dataset.tanggal || '').slice(0, 10);
+            const matchTanggalDari = !tanggalDari || (rowTanggal && rowTanggal >= tanggalDari);
+            const matchTanggalSampai = !tanggalSampai || (rowTanggal && rowTanggal <= tanggalSampai);
+
+            const visible = matchQuery && matchKlasifikasi && matchTanggalDari && matchTanggalSampai;
 
             row.classList.toggle('d-none', !visible);
             if (visible) visibleCount++;
@@ -486,6 +688,8 @@
         if (emptySearchState) {
             emptySearchState.classList.toggle('d-none', visibleCount !== 0);
         }
+
+        renumberVisibleRows();
     }
 
     function applySort() {
@@ -506,9 +710,95 @@
     if (searchInput) {
         searchInput.addEventListener('input', applyFilters);
         filterKlasifikasi.addEventListener('change', applyFilters);
+        filterTanggalDari.addEventListener('change', applyFilters);
+        filterTanggalSampai.addEventListener('change', applyFilters);
         sortOrder.addEventListener('change', () => {
             applySort();
             applyFilters();
+        });
+    }
+
+    if (resetTanggalBtn) {
+        resetTanggalBtn.addEventListener('click', () => {
+            filterTanggalDari.value = '';
+            filterTanggalSampai.value = '';
+            applyFilters();
+        });
+    }
+
+    // Nomori baris begitu halaman selesai dimuat.
+    renumberVisibleRows();
+
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    const exportSpinner = document.getElementById('exportSpinner');
+    const exportDoneText = document.getElementById('exportDoneText');
+    let exportDoneTimer = null;
+
+    function extractFilename(response, fallback) {
+        const header = response.headers.get('Content-Disposition') || '';
+        const match = header.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+        return match ? decodeURIComponent(match[1]) : fallback;
+    }
+
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (exportExcelBtn.classList.contains('is-loading')) return;
+
+            const params = new URLSearchParams();
+
+            if (searchInput && searchInput.value.trim()) {
+                params.set('search', searchInput.value.trim());
+            }
+            if (filterKlasifikasi && filterKlasifikasi.value) {
+                params.set('klasifikasi', filterKlasifikasi.value);
+            }
+            if (sortOrder && sortOrder.value) {
+                params.set('sort', sortOrder.value);
+            }
+            if (filterTanggalDari && filterTanggalDari.value) {
+                params.set('tanggal_dari', filterTanggalDari.value);
+            }
+            if (filterTanggalSampai && filterTanggalSampai.value) {
+                params.set('tanggal_sampai', filterTanggalSampai.value);
+            }
+
+            const exportUrl = `{{ route('surat.export') }}?${params.toString()}`;
+
+            clearTimeout(exportDoneTimer);
+            exportDoneText.classList.add('d-none');
+            exportExcelBtn.classList.add('is-loading');
+            exportSpinner.classList.remove('d-none');
+
+            fetch(exportUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => {
+                    if (!response.ok) throw new Error('Export gagal');
+                    const filename = extractFilename(response, 'riwayat-surat.xlsx');
+                    return response.blob().then(blob => ({ blob, filename }));
+                })
+                .then(({ blob, filename }) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+
+                    exportSpinner.classList.add('d-none');
+                    exportDoneText.classList.remove('d-none');
+                    exportDoneTimer = setTimeout(() => {
+                        exportDoneText.classList.add('d-none');
+                    }, 2500);
+                })
+                .catch(() => {
+                    exportSpinner.classList.add('d-none');
+                    alert('Export ke Excel gagal. Coba lagi.');
+                })
+                .finally(() => {
+                    exportExcelBtn.classList.remove('is-loading');
+                });
         });
     }
 </script>
