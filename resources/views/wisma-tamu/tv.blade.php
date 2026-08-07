@@ -18,7 +18,7 @@
             font-family: 'Inter', -apple-system, sans-serif;
             color: #ffffff;
             overflow: hidden;
-            background: #0a0303;
+            background: #02120c;
         }
 
         /* ---- Langit bintang kerlap-kerlip ---- */
@@ -26,7 +26,7 @@
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: radial-gradient(ellipse at 50% 15%, #2a0a0a 0%, #0a0303 70%);
+            background: radial-gradient(ellipse at 50% 15%, #0b3d28 0%, #02120c 70%);
             overflow: hidden;
         }
 
@@ -69,6 +69,40 @@
             0%   { transform: translate(0, 0); opacity: 1; }
             85%  { opacity: 1; }
             100% { transform: translate(-38vw, 24vh); opacity: 0; }
+        }
+
+        .ember {
+            position: absolute;
+            bottom: -2vh;
+            border-radius: 50%;
+            background: radial-gradient(circle, #d9f99d, #10b981 70%);
+            box-shadow: 0 0 6px 1px rgba(16, 185, 129, 0.7);
+            animation-name: emberRise;
+            animation-timing-function: ease-in;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes emberRise {
+            0%   { transform: translate(0, 0) scale(1); opacity: 0.9; }
+            100% { transform: translate(var(--drift, 2vw), -100vh) scale(0.3); opacity: 0; }
+        }
+
+        /* Bulatan cahaya besar melayang pelan di background, kesan aesthetic */
+        .aurora {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            animation: auroraDrift 18s ease-in-out infinite;
+        }
+
+        .aurora.a1 { width: 40vw; height: 40vw; left: -8vw; top: -12vh; background: radial-gradient(circle, #10b981, transparent 70%); }
+        .aurora.a2 { width: 36vw; height: 36vw; right: -10vw; top: 20vh; background: radial-gradient(circle, #34d399, transparent 70%); animation-delay: 4s; }
+        .aurora.a3 { width: 32vw; height: 32vw; left: 30vw; bottom: -14vh; background: radial-gradient(circle, #6ee7b7, transparent 70%); animation-delay: 8s; }
+
+        @keyframes auroraDrift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%      { transform: translate(3vw, -2vh) scale(1.12); }
         }
 
         /* ---- Panggung slide ---- */
@@ -114,14 +148,7 @@
             width: 15px;
             height: 15px;
             border-radius: 50%;
-            background: linear-gradient(120deg, #ef4444, #f97316, #f59e0b);
-            background-size: 300% 300%;
-            animation: warmFlow 3s ease infinite, softPulse 2.2s ease-in-out infinite;
-        }
-
-        @keyframes softPulse {
-            0%, 100% { box-shadow: 0 0 0 rgba(249, 115, 22, 0.5); }
-            50%      { box-shadow: 0 0 16px 4px rgba(249, 115, 22, 0.55); }
+            background: #10b981;
         }
 
         .tv-slide-label {
@@ -134,8 +161,30 @@
         .tv-right {
             display: flex;
             align-items: center;
-            gap: 1.4rem;
+            gap: 1.1rem;
         }
+
+        .tv-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.92rem;
+            font-weight: 700;
+            background: rgba(0,0,0,0.28);
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            transition: transform 0.25s ease;
+        }
+
+        .tv-stat.pop { animation: statPop 0.5s ease; }
+
+        @keyframes statPop {
+            0%   { opacity: 0.55; }
+            100% { opacity: 1; }
+        }
+
+        .tv-stat b.terisi-count { color: #6ee7b7; }
+        .tv-stat b.kosong-count { color: #a7f3d0; }
 
         .tv-live {
             display: flex;
@@ -144,7 +193,7 @@
             font-size: 0.85rem;
             font-weight: 800;
             letter-spacing: 0.1em;
-            color: #fca5a5;
+            color: #f87171;
             background: rgba(0,0,0,0.28);
             padding: 0.32rem 0.75rem;
             border-radius: 999px;
@@ -191,9 +240,9 @@
             border-radius: 5px;
         }
 
-        .tv-legend .dot.kosong { background: linear-gradient(120deg, #5b1010, #7f1d1d); }
+        .tv-legend .dot.kosong { background: linear-gradient(120deg, #0a3324, #0f5c3d); }
         .tv-legend .dot.terisi {
-            background: linear-gradient(120deg, #ef4444, #f97316, #f59e0b);
+            background: linear-gradient(120deg, #10b981, #34d399, #6ee7b7);
             background-size: 300% 300%;
             animation: warmFlow 3s ease infinite;
         }
@@ -209,30 +258,36 @@
         }
 
         .room-row {
+            position: relative;
             display: flex;
             align-items: center;
             gap: 1.6vw;
             border-radius: 20px;
             padding: 1.6vh 2vw;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
             opacity: 0;
             transform: translateY(18px);
             animation: rowRise 0.55s ease forwards;
+            isolation: isolate;
+            overflow: hidden;
         }
 
         @keyframes rowRise {
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Kosong: hijau tua tenang & glossy */
         .room-row.kosong {
-            background: linear-gradient(120deg, #3f0d0d, #23070a, #3f0d0d);
+            background: linear-gradient(160deg, #0b4230, #06301f 55%, #0b4230);
         }
 
+        /* Terisi: gradasi hijau-emerald-mint bergerak + glow berdenyut lembut */
         .room-row.terisi {
-            background: linear-gradient(110deg, #b91c1c, #ef4444, #f97316, #f59e0b, #f97316, #ef4444, #b91c1c);
+            background: linear-gradient(110deg, #059669, #10b981, #34d399, #6ee7b7, #34d399, #10b981, #059669);
             background-size: 400% 400%;
-            animation: rowRise 0.55s ease forwards, warmFlow 5s ease infinite, pulseGlow 2.6s ease-in-out infinite;
+            border-color: rgba(255, 255, 255, 0.28);
+            animation: rowRise 0.55s ease forwards, warmFlow 6s ease infinite, pulseGlow 3s ease-in-out infinite;
         }
 
         @keyframes warmFlow {
@@ -242,8 +297,8 @@
         }
 
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 0 rgba(249, 115, 22, 0); }
-            50%      { box-shadow: 0 0 40px rgba(249, 115, 22, 0.55); }
+            0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 rgba(16, 185, 129, 0); }
+            50%      { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 28px rgba(52, 211, 153, 0.45); }
         }
 
         .room-icon {
@@ -257,15 +312,8 @@
             font-size: clamp(1.3rem, 1.8vw, 1.7rem);
             background: rgba(0, 0, 0, 0.25);
             flex-shrink: 0;
-        }
-
-        .room-row.terisi .room-icon i {
-            animation: iconPulse 1.6s ease-in-out infinite;
-        }
-
-        @keyframes iconPulse {
-            0%, 100% { transform: scale(1); }
-            50%      { transform: scale(1.18); }
+            position: relative;
+            z-index: 1;
         }
 
         .room-number {
@@ -274,19 +322,9 @@
             width: 5vw;
             min-width: 82px;
             line-height: 1;
-        }
-
-        .room-number.text-gradient {
-            background: linear-gradient(100deg, #ffffff 0%, #ffe6a0 25%, #ffffff 50%, #ffe6a0 75%, #ffffff 100%);
-            background-size: 250% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: shimmer 4s linear infinite;
-        }
-
-        @keyframes shimmer {
-            to { background-position: -250% center; }
+            position: relative;
+            z-index: 1;
+            color: #ffffff;
         }
 
         .room-status {
@@ -297,6 +335,8 @@
             width: 8.5vw;
             min-width: 125px;
             color: rgba(255, 255, 255, 0.95);
+            position: relative;
+            z-index: 1;
         }
 
         .room-guest {
@@ -306,12 +346,16 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            position: relative;
+            z-index: 1;
         }
 
         .room-checkout {
             font-size: clamp(0.95rem, 1.15vw, 1.1rem);
             color: rgba(255, 255, 255, 0.85);
             white-space: nowrap;
+            position: relative;
+            z-index: 1;
         }
 
         /* ---- Footer ---- */
@@ -350,23 +394,103 @@
         .tv-progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #f97316, #f59e0b, #ffffff);
+            background: linear-gradient(90deg, #10b981, #6ee7b7, #ffffff);
             border-radius: 999px;
         }
 
         .tv-progress-bar.running {
-            animation: fillBar 10s linear forwards;
+            animation: fillBar 5s linear forwards;
         }
 
         @keyframes fillBar {
             from { width: 0%; }
             to   { width: 100%; }
         }
+
+        @media (max-width: 600px) {
+    /* --- Header --- */
+    .tv-topbar {
+        flex-wrap: wrap;
+        row-gap: 0.6vh;
+    }
+    .tv-brand {
+        font-size: 1.15rem;
+        white-space: nowrap;
+        order: 1;
+    }
+    .tv-right {
+        order: 2;
+        gap: 0.8rem;
+    }
+    .tv-live {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+    }
+    .tv-clock {
+        font-size: 1rem;
+    }
+    .tv-slide-label {
+        order: 3;
+        flex-basis: 100%;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        padding-left: calc(15px + 0.8rem); /* sejajar dgn teks "Wisma Tamu", bukan titiknya */
+    }
+
+    /* --- List kamar --- */
+    .tv-list {
+        gap: 0.8vh;
+        padding: 1vh 3vw 1vh;
+    }
+    .room-row {
+        flex-wrap: wrap;
+        row-gap: 0.3rem;
+        padding: 1vh 3vw;
+    }
+    .room-icon {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+    }
+    .room-number {
+        width: auto;
+        min-width: 50px;
+        font-size: 1.8rem;
+    }
+    .room-status {
+        width: auto;
+        min-width: 70px;
+        font-size: 0.85rem;
+    }
+    .room-guest {
+        font-size: 1rem;
+        min-width: 0;
+        margin-left: auto;   /* dorong nama ke pojok kanan, dekat status */
+        text-align: right;
+        flex: 0 1 auto;
+    }
+    .room-checkout {
+        flex-basis: 100%;
+        order: 5;
+        white-space: normal;
+        font-size: 0.8rem;
+        margin-left: calc(44px + 1.6vw); /* sejajar dgn angka kamar, bukan mepet ikon */
+    }
+    .room-guest:empty,
+    .room-checkout:empty {
+        display: none;
+    }
+}
     </style>
 </head>
 <body>
 
-<div class="tv-sky" id="tvSky"></div>
+<div class="tv-sky" id="tvSky">
+    <div class="aurora a1"></div>
+    <div class="aurora a2"></div>
+    <div class="aurora a3"></div>
+</div>
 
 <div class="tv-viewport">
     <div class="tv-sheet pos-active" id="sheetA">
@@ -374,6 +498,7 @@
             <div class="tv-brand"><span class="badge-dot"></span> Wisma Tamu</div>
             <div class="tv-slide-label" data-role="slide-label">Kamar 1 - 5</div>
             <div class="tv-right">
+                <div class="tv-stat" data-role="stat"><i class="bi bi-houses-fill"></i> <b class="terisi-count" data-role="terisi-count">0</b> Terisi &middot; <b class="kosong-count" data-role="kosong-count">0</b> Kosong</div>
                 <div class="tv-live"><span class="blink"></span> LIVE</div>
                 <div class="tv-clock" data-role="clock">--:--:--</div>
             </div>
@@ -394,6 +519,7 @@
             <div class="tv-brand"><span class="badge-dot"></span> Wisma Tamu</div>
             <div class="tv-slide-label" data-role="slide-label">Kamar 1 - 5</div>
             <div class="tv-right">
+                <div class="tv-stat" data-role="stat"><i class="bi bi-houses-fill"></i> <b class="terisi-count" data-role="terisi-count">0</b> Terisi &middot; <b class="kosong-count" data-role="kosong-count">0</b> Kosong</div>
                 <div class="tv-live"><span class="blink"></span> LIVE</div>
                 <div class="tv-clock" data-role="clock">--:--:--</div>
             </div>
@@ -414,7 +540,7 @@
     const dataUrl = "{{ route('wisma-tamu.tv-data') }}";
     const totalKamar = {{ \App\Models\WismaTamu::TOTAL_KAMAR }};
     const ROOMS_PER_SLIDE = 5;
-    const CYCLE_MS = 10000;
+    const CYCLE_MS = 5000;
 
     const sky = document.getElementById('tvSky');
     const sheetA = document.getElementById('sheetA');
@@ -429,6 +555,7 @@
 
     const totalSlides = Math.ceil(totalKamar / ROOMS_PER_SLIDE);
     let currentSlide = 0;
+    let lastTerisiCount = null;
 
     function buildStars() {
         const count = 110;
@@ -455,6 +582,20 @@
         setTimeout(() => star.remove(), 1700);
     }
 
+    function spawnEmber() {
+        const ember = document.createElement('div');
+        ember.className = 'ember';
+        const size = (Math.random() * 5 + 3).toFixed(1);
+        ember.style.width = size + 'px';
+        ember.style.height = size + 'px';
+        ember.style.left = (Math.random() * 100) + '%';
+        ember.style.setProperty('--drift', ((Math.random() * 6) - 3).toFixed(1) + 'vw');
+        const duration = (Math.random() * 4 + 6).toFixed(1) + 's';
+        ember.style.animationDuration = duration;
+        sky.appendChild(ember);
+        setTimeout(() => ember.remove(), 10500);
+    }
+
     function buildDots(sheet) {
         const wrap = sheet.querySelector('[data-role="dots"]');
         wrap.innerHTML = '';
@@ -479,12 +620,28 @@
         return `
             <div class="room-row ${statusKey}" style="animation-delay:${i * 0.09}s">
                 <div class="room-icon"><i class="bi ${icon}"></i></div>
-                <div class="room-number text-gradient">${String(kamar.nomor_kamar).padStart(2, '0')}</div>
+                <div class="room-number">${String(kamar.nomor_kamar).padStart(2, '0')}</div>
                 <div class="room-status">${kamar.terisi ? 'Terisi' : 'Kosong'}</div>
                 <div class="room-guest">${guest}</div>
                 <div class="room-checkout">${checkout}</div>
             </div>
         `;
+    }
+
+    function updateStats(sheet) {
+        const terisi = kamarData.filter(k => k.terisi).length;
+        const kosong = totalKamar - terisi;
+
+        sheet.querySelector('[data-role="terisi-count"]').textContent = terisi;
+        sheet.querySelector('[data-role="kosong-count"]').textContent = kosong;
+
+        if (lastTerisiCount !== null && lastTerisiCount !== terisi) {
+            const stat = sheet.querySelector('[data-role="stat"]');
+            stat.classList.remove('pop');
+            void stat.offsetWidth;
+            stat.classList.add('pop');
+        }
+        lastTerisiCount = terisi;
     }
 
     function renderInto(sheet, slideIndex) {
@@ -496,6 +653,8 @@
             `Kamar ${rooms[0].nomor_kamar} - ${rooms[rooms.length - 1].nomor_kamar}`;
 
         sheet.querySelectorAll('[data-role="dots"] .dot').forEach((d, i) => d.classList.toggle('active', i === slideIndex));
+
+        updateStats(sheet);
 
         const bar = sheet.querySelector('[data-role="progress"]');
         bar.classList.remove('running');
@@ -543,6 +702,7 @@
     renderClock();
     setInterval(renderClock, 1000);
     setInterval(spawnShootingStar, 4500);
+    setInterval(spawnEmber, 900);
 
     fetchStatus().then(() => renderInto(front, currentSlide));
     setInterval(fetchStatus, 20000);

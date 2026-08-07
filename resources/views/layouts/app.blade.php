@@ -7,10 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    {{-- <link rel="stylesheet" href="{{ asset('css/assets/style.css') }}"> --}}
-
-   {{-- <link rel="stylesheet" href="{{ asset('asset/tambahsurat.css') }}"> --}}
-
     @stack('styles')
 
     <style>
@@ -18,6 +14,7 @@
             margin: 0;
             background: #f6f7fb;
             font-family: 'Inter', 'Segoe UI', sans-serif;
+            overflow-x: hidden;
         }
 
         .app-shell {
@@ -35,7 +32,9 @@
         @media (max-width: 767px) {
             .content {
                 margin-left: 0;
-                padding-top: 30px;
+                padding-top: calc(15px + 60px);
+                padding-left: 15px;
+                padding-right: 15px;
             }
         }
 
@@ -52,6 +51,7 @@
             align-items: center;
             justify-content: center;
             margin-right: 0.7rem;
+            flex-shrink: 0;
         }
 
         @media (max-width: 767px) {
@@ -87,6 +87,13 @@
             left: 0;
             z-index: 1000;
             padding: 0 20px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            .navbar-custom {
+                padding: 0 12px;
+            }
         }
 
         .profile-btn {
@@ -95,6 +102,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .profile-btn i {
@@ -103,6 +111,12 @@
 
         .profile-btn .bi-person-circle {
             font-size: 34px;
+        }
+
+        @media (max-width: 480px) {
+            .profile-btn .bi-person-circle {
+                font-size: 28px;
+            }
         }
 
         .profile-btn .bi-chevron-down {
@@ -127,12 +141,24 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .logo img {
-            height: 65px;
+            height: 45px;
             width: auto;
             object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                gap: 6px;
+            }
+            .logo img {
+                height: 32px;
+            }
         }
     </style>
 </head>
@@ -149,7 +175,7 @@
 
         <div class="d-flex align-items-center ms-auto">
             <button class="sidebar-toggle-btn" id="sidebarToggleBtn" type="button" aria-label="Buka menu">
-                <i class="bi bi-list"></i>
+                <i class="bi bi-three-dots-vertical"></i>
             </button>
 
             <div class="dropdown">
@@ -218,19 +244,17 @@
 
         backdrop.addEventListener('click', closeSidebar);
 
-        // Tutup otomatis kalau salah satu link menu diklik (biar nggak nutupin konten setelah pindah halaman)
         sidebar.querySelectorAll('a').forEach(function (link) {
             link.addEventListener('click', closeSidebar);
         });
 
-        // Kalau layar dibesarin balik ke ukuran desktop, pastikan sidebar & backdrop reset
         window.addEventListener('resize', function () {
             if (window.innerWidth > 767) closeSidebar();
         });
     });
 </script>
 
-@stack('scripts') {{-- <<< BARIS BARU: tempat nampung @push('scripts') dari child view --}}
+@stack('scripts')
 
 </body>
 </html>
