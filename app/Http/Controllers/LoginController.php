@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // public function index()
-    // {
-    //     return view('auth.login');
-    // }
-
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -24,7 +19,7 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
 
-            return redirect()->route('dashboard');
+            return $this->redirectByRole();
         }
 
         return back()->withErrors([
@@ -44,11 +39,22 @@ class LoginController extends Controller
     }
 
     public function index()
-{
-    if(Auth::check()){
-        return redirect()->route('dashboard');
+    {
+        if (Auth::check()) {
+            return $this->redirectByRole();
+        }
+
+        return view('login');
     }
 
-    return view('login');
-}
+    private function redirectByRole()
+    {
+        $user = Auth::user();
+
+        return match ($user->role) {
+            'satpam'     => redirect()->route('patroli.index'),
+            'supervisor' => redirect()->route('patroli.monitoring.index'),
+            default      => redirect()->route('dashboard'),
+        };
+    }
 }

@@ -9,150 +9,251 @@
             </div>
         </div>
 
+        @php
+            $role = auth()->user()->role ?? null;
+            // Satpam & supervisor cuma butuh menu Patroli, tidak perlu akses modul surat/kontrak/dll.
+            $tampilkanMenuUmum = ! in_array($role, ['satpam', 'supervisor']);
+        @endphp
+
         <ul class="nav-menu">
-            <li>
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Halaman Utama</span>
-                </a>
-            </li>
+            @if ($tampilkanMenuUmum)
+                <li>
+                    <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-grid-1x2"></i>
+                        <span>Halaman Utama</span>
+                    </a>
+                </li>
+            @endif
 
-            @php
-                $manajemenSuratActive = request()->routeIs('tambahsurat') || request()->routeIs('keepnomorsurat') || request()->routeIs('riwayatsurat');
-            @endphp
-            <li class="nav-group">
-                <div class="nav-link nav-link-parent nav-link-static {{ $manajemenSuratActive ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Manajemen Surat</span>
-                </div>
+            {{-- ================= PATROLI DIGITAL ================= --}}
+            @if ($role === 'satpam')
+                @php
+                    $patroliActive = request()->routeIs('patroli.index')
+                        || request()->routeIs('patroli.scan.*')
+                        || request()->routeIs('patroli.riwayat')
+                        || request()->routeIs('patroli.riwayat.show');
+                @endphp
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ $patroliActive ? 'active' : '' }}">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Patroli Digital</span>
+                    </div>
+                    <div id="patroliMenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('patroli.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.index') || request()->routeIs('patroli.scan.*') ? 'active' : '' }}">
+                                    <i class="bi bi-qr-code-scan"></i>
+                                    <span>Patroli Saya</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.riwayat') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.riwayat') || request()->routeIs('patroli.riwayat.show') ? 'active' : '' }}">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Riwayat Shift</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            @elseif ($role === 'supervisor')
+                @php
+                    $patroliActive = request()->routeIs('patroli.monitoring.*') || request()->routeIs('patroli.checkpoint.*') || request()->routeIs('patroli.jadwal.*');
+                @endphp
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ $patroliActive ? 'active' : '' }}">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Patroli Digital</span>
+                    </div>
+                    <div id="patroliMenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('patroli.monitoring.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.monitoring.index') || request()->routeIs('patroli.monitoring.show') ? 'active' : '' }}">
+                                    <i class="bi bi-display"></i>
+                                    <span>Monitoring</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.jadwal.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.jadwal.*') ? 'active' : '' }}">
+                                    <i class="bi bi-calendar-week"></i>
+                                    <span>Jadwal Patroli</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.monitoring.laporan') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.monitoring.laporan') ? 'active' : '' }}">
+                                    <i class="bi bi-bar-chart"></i>
+                                    <span>Laporan</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.monitoring.riwayat') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.monitoring.riwayat') ? 'active' : '' }}">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Riwayat Semua Shift</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.checkpoint.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.checkpoint.index') ? 'active' : '' }}">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Kelola Checkpoint</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('patroli.checkpoint.print') }}"
+                                   class="nav-sublink {{ request()->routeIs('patroli.checkpoint.print') ? 'active' : '' }}">
+                                    <i class="bi bi-qr-code"></i>
+                                    <span>Cetak QR Checkpoint</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            @endif
 
-                <div id="manajemenSuratMenu">
-                    <ul class="nav-submenu">
-                        <li>
-                            <a href="{{ route('tambahsurat') }}"
-                               class="nav-sublink {{ request()->routeIs('tambahsurat') ? 'active' : '' }}">
-                                <i class="bi bi-file-earmark-plus"></i>
-                                <span>Buat Nomor Surat</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('keepnomorsurat') }}"
-                               class="nav-sublink {{ request()->routeIs('keepnomorsurat') ? 'active' : '' }}">
-                                <i class="bi bi-file-earmark"></i>
-                                <span>Cadangan Nomor Surat</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('riwayatsurat') }}"
-                                class="nav-sublink {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
-                                <i class="bi bi-folder2-open"></i>
-                                <span>Riwayat Surat</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            {{-- ================= MENU UMUM (disembunyikan untuk satpam & supervisor) ================= --}}
+            @if ($tampilkanMenuUmum)
+                @php
+                    $manajemenSuratActive = request()->routeIs('tambahsurat') || request()->routeIs('keepnomorsurat') || request()->routeIs('riwayatsurat');
+                @endphp
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ $manajemenSuratActive ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Manajemen Surat</span>
+                    </div>
 
-            @php
-                $manajemenKontrakActive = request()->routeIs('kontrak.*') || request()->routeIs('karyawan.*');
-            @endphp
-            <li class="nav-group">
-                <div class="nav-link nav-link-parent nav-link-static {{ $manajemenKontrakActive ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-ruled"></i>
-                    <span>Manajemen Kontrak</span>
-                </div>
+                    <div id="manajemenSuratMenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('tambahsurat') }}"
+                                   class="nav-sublink {{ request()->routeIs('tambahsurat') ? 'active' : '' }}">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                    <span>Buat Nomor Surat</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('keepnomorsurat') }}"
+                                   class="nav-sublink {{ request()->routeIs('keepnomorsurat') ? 'active' : '' }}">
+                                    <i class="bi bi-file-earmark"></i>
+                                    <span>Cadangan Nomor Surat</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('riwayatsurat') }}"
+                                    class="nav-sublink {{ request()->routeIs('riwayatsurat') ? 'active' : '' }}">
+                                    <i class="bi bi-folder2-open"></i>
+                                    <span>Riwayat Surat</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
-                <div id="manajemenKontrakMenu">
-                    <ul class="nav-submenu">
-                        <li>
-                            <a href="{{ route('kontrak.create') }}"
-                               class="nav-sublink {{ request()->routeIs('kontrak.create') || request()->routeIs('kontrak.store') ? 'active' : '' }}">
-                                <i class="bi bi-file-earmark-plus"></i>
-                                <span>Buat Kontrak</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('kontrak.index') }}"
-                               class="nav-sublink {{ request()->routeIs('kontrak.index') || request()->routeIs('kontrak.show') || request()->routeIs('kontrak.upload.form') ? 'active' : '' }}">
-                                <i class="bi bi-folder2-open"></i>
-                                <span>Daftar Kontrak</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('karyawan.index') }}"
-                               class="nav-sublink {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
-                                <i class="bi bi-people"></i>
-                                <span>Data Karyawan</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+                @php
+                    $manajemenKontrakActive = request()->routeIs('kontrak.*') || request()->routeIs('karyawan.*');
+                @endphp
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ $manajemenKontrakActive ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-ruled"></i>
+                        <span>Manajemen Kontrak</span>
+                    </div>
 
-            <li class="nav-group">
-                <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('arsipkasbon.*') ? 'active' : '' }}">
-                    <i class="bi bi-receipt"></i>
-                    <span class="flex-grow-1">Surat Permintaan Pembayaran</span>
-                </div>
-                <div id="arsipSppSubmenu">
-                    <ul class="nav-submenu">
-                        <li>
-                            <a href="{{ route('arsipkasbon.create') }}"
-                               class="nav-sublink {{ request()->routeIs('arsipkasbon.create') ? 'active' : '' }}">
-                                <i class="bi bi-camera"></i>
-                                <span>Unggah Surat Baru</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('arsipkasbon.index') }}"
-                               class="nav-sublink {{ request()->routeIs('arsipkasbon.index') || request()->routeIs('arsipkasbon.show') ? 'active' : '' }}">
-                                <i class="bi bi-clock-history"></i>
-                                <span>Riwayat Arsip SPP</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+                    <div id="manajemenKontrakMenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('kontrak.create') }}"
+                                   class="nav-sublink {{ request()->routeIs('kontrak.create') || request()->routeIs('kontrak.store') ? 'active' : '' }}">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                    <span>Buat Kontrak</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('kontrak.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('kontrak.index') || request()->routeIs('kontrak.show') || request()->routeIs('kontrak.upload.form') ? 'active' : '' }}">
+                                    <i class="bi bi-folder2-open"></i>
+                                    <span>Daftar Kontrak</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('karyawan.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                                    <i class="bi bi-people"></i>
+                                    <span>Data Karyawan</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
-            <li class="nav-group">
-                <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('wisma-tamu.*') ? 'active' : '' }}">
-                    <i class="bi bi-building"></i>
-                    <span>Wisma Tamu</span>
-                </div>
-                <div id="wismaTamuMenu">
-                    <ul class="nav-submenu">
-                        <li>
-                            <a href="{{ route('wisma-tamu.create') }}"
-                               class="nav-sublink {{ request()->routeIs('wisma-tamu.create') || request()->routeIs('wisma-tamu.store') ? 'active' : '' }}">
-                                <i class="bi bi-person-plus"></i>
-                                <span>Input Tamu</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('wisma-tamu.index') }}"
-                               class="nav-sublink {{ request()->routeIs('wisma-tamu.index') || request()->routeIs('wisma-tamu.edit') ? 'active' : '' }}">
-                                <i class="bi bi-door-open"></i>
-                                <span>Daftar Kamar &amp; Tamu</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('wisma-tamu.tv') }}" target="_blank" class="nav-sublink">
-                                <i class="bi bi-tv"></i>
-                                <span>Buka Tampilan TV</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('arsipkasbon.*') ? 'active' : '' }}">
+                        <i class="bi bi-receipt"></i>
+                        <span class="flex-grow-1">Surat Permintaan Pembayaran</span>
+                    </div>
+                    <div id="arsipSppSubmenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('arsipkasbon.create') }}"
+                                   class="nav-sublink {{ request()->routeIs('arsipkasbon.create') ? 'active' : '' }}">
+                                    <i class="bi bi-camera"></i>
+                                    <span>Unggah Surat Baru</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('arsipkasbon.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('arsipkasbon.index') || request()->routeIs('arsipkasbon.show') ? 'active' : '' }}">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Riwayat Arsip SPP</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-group">
+                    <div class="nav-link nav-link-parent nav-link-static {{ request()->routeIs('wisma-tamu.*') ? 'active' : '' }}">
+                        <i class="bi bi-building"></i>
+                        <span>Wisma Tamu</span>
+                    </div>
+                    <div id="wismaTamuMenu">
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="{{ route('wisma-tamu.create') }}"
+                                   class="nav-sublink {{ request()->routeIs('wisma-tamu.create') || request()->routeIs('wisma-tamu.store') ? 'active' : '' }}">
+                                    <i class="bi bi-person-plus"></i>
+                                    <span>Input Tamu</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('wisma-tamu.index') }}"
+                                   class="nav-sublink {{ request()->routeIs('wisma-tamu.index') || request()->routeIs('wisma-tamu.edit') ? 'active' : '' }}">
+                                    <i class="bi bi-door-open"></i>
+                                    <span>Daftar Kamar &amp; Tamu</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('wisma-tamu.tv') }}" target="_blank" class="nav-sublink">
+                                    <i class="bi bi-tv"></i>
+                                    <span>Buka Tampilan TV</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            @endif
 
         </ul>
     </div>
 
     <div class="user-profile">
-        <div class="avatar">A</div>
+        <div class="avatar">{{ strtoupper(substr(auth()->user()->username ?? 'A', 0, 1)) }}</div>
         <div class="user-meta">
-            <strong>Admin</strong>
-            {{-- <small>Online</small> --}}
+            <strong>{{ auth()->user()->username ?? 'Admin' }}</strong>
+            <small>{{ ucfirst($role ?? '') }}</small>
         </div>
     </div>
 </aside>

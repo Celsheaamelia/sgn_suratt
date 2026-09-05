@@ -6,11 +6,28 @@ use App\Models\RiwayatSurat;
 use App\Models\ArsipKasbon;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
      public function index()
     {
+     /** @var \App\Models\User $user */
+    $user = Auth::user();
+
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    // Dashboard umum (surat/kontrak/kasbon) di luar cakupan role satpam & supervisor,
+    // arahkan mereka ke halaman Patroli Digital masing-masing.
+    if ($user->role === 'satpam') {
+        return redirect()->route('patroli.index');
+    }
+    if ($user->role === 'supervisor') {
+        return redirect()->route('patroli.monitoring.index');
+    }
+
         $totalSurat  = RiwayatSurat::count();
         $suratHariIni = RiwayatSurat::whereDate('tanggal', Carbon::today())->count();
         $sudahUpload = RiwayatSurat::where('status', 'Terupload')->count();

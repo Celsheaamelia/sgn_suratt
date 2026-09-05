@@ -46,5 +46,11 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'people_one' => [   // <-- ini yang kamu tambahin
+        'enabled'  => env('PEOPLE_ONE_ENABLED', false),
+        'base_url' => env('PEOPLE_ONE_BASE_URL'),
+        'api_key'  => env('PEOPLE_ONE_API_KEY'),
+    ],
+
 ];
 
